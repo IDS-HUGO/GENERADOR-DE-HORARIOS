@@ -1,0 +1,59 @@
+    # ClassControl - .gitignore
+
+# Archivos de configuración sensibles
+src/config.php.local
+src/config.production.php
+
+# Logs
+logs/*.log
+logs/error.log
+logs/activity.log
+*.log
+
+# Archivos del IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Dependencias
+node_modules/
+vendor/
+composer.lock
+
+# Archivos temporales
+*.tmp
+*.temp
+tmp/
+temp/
+
+# Archivos de sistema
+.htpasswd
+.env
+.env.local
+
+# Copias de seguridad
+*.bak
+*.backup
+*.sql.bak
+
+# Directorios específicos
+public_html/
+wp-admin/
+wp-includes/
+
+# Cache
+.cache/
+*.cache
+
+# Archivos de prueba
+test-files/
+testing/
+
+# Base de datos temporales
+*.sqlite
+*.sqlite3
+*.db

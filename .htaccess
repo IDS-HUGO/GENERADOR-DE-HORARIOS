@@ -1,0 +1,49 @@
+# ClassControl - Configuración de seguridad
+
+# Habilitar módulo mod_rewrite
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    
+    # Evitar acceso directo a archivos sensibles
+    RewriteRule ^src/ - [F,L]
+    RewriteRule ^database/ - [F,L]
+    RewriteRule ^logs/ - [F,L]
+    RewriteRule ^\.git - [F,L]
+</IfModule>
+
+# Evitar listado de directorios
+<IfModule mod_autoindex.c>
+    Options -Indexes
+</IfModule>
+
+# Encabezados de seguridad
+<IfModule mod_headers.c>
+    # Evitar ataques de clics
+    Header always set X-Frame-Options "SAMEORIGIN"
+    
+    # Proteger contra MIME type sniffing
+    Header always set X-Content-Type-Options "nosniff"
+    
+    # Activar XSS protection
+    Header always set X-XSS-Protection "1; mode=block"
+    
+    # Content Security Policy
+    Header always set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline';"
+    
+    # Prevenir acceso a archivos de configuración
+    Header always set X-Robots-Tag "noindex, nofollow"
+</IfModule>
+
+# Evitar acceso a archivos específicos
+<FilesMatch "\.(php|config|sql|txt|log|json)$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+</FilesMatch>
+
+# Permitir acceso solo a public
+<Directory "*/public/*">
+    <IfModule mod_authz_core.c>
+        Require all granted
+    </IfModule>
+</Directory>
