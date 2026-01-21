@@ -21,7 +21,7 @@ define('DB_PORT', 3306);
 define('PRODUCTION', true);
 define('APP_NAME', 'ClassControl');
 define('APP_VERSION', '1.0');
-define('APP_URL', 'http://localhost/ClassControl_LocalHost');
+define('APP_URL', 'http://localhost/ClassControl');
 
 // =====================================================
 // CONFIGURACIÓN DE SEGURIDAD

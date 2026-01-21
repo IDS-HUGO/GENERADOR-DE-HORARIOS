@@ -1,7 +1,19 @@
-# Denegar acceso a todos los archivos en la carpeta src/
-Deny from all
+########################################################
+# Restringir acceso a src salvo scripts PHP (Apache 2.2/2.4)
+########################################################
 
-# Permitir solo ciertos archivos que actúan como API
-<Files "*.php">
-    Allow from all
-</Files>
+# Apache 2.4
+<IfModule mod_authz_core.c>
+    Require all denied
+    <FilesMatch "\.php$">
+        Require all granted
+    </FilesMatch>
+ </IfModule>
+
+# Compatibilidad Apache 2.2
+<IfModule !mod_authz_core.c>
+    Deny from all
+    <Files "*.php">
+        Allow from all
+    </Files>
+</IfModule>

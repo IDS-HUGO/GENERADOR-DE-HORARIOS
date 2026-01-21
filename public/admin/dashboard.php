@@ -1,8 +1,8 @@
 <?php
-require_once '../src/config.php';
+require_once '../../src/config.php';
 
-if (!isAuthenticated() || getCurrentUser()['tipo'] !== 'administrador') {
-    redirect(baseUrl('/index.html'));
+if (!isAuthenticated() || getCurrentUser()['tipo_usuario'] !== 'administrador') {
+    redirect(baseUrl('/public/index.html'));
 }
 
 $user = getCurrentUser();
@@ -533,7 +533,7 @@ $user = getCurrentUser();
 
         function logout() {
             if (confirm('¿Desea cerrar sesión?')) {
-                window.location.href = '/src/api/auth/logout.php';
+                window.location.href = '<?php echo baseUrl('src/api/auth/logout.php'); ?>';
             }
         }
     </script>

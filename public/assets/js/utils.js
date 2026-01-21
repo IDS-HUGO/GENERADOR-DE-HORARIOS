@@ -4,7 +4,22 @@
  */
 
 const DEBUG_MODE = false;
-const API_BASE_URL = window.location.origin + '/ClassControl_LocalHost';
+
+function detectApiBase() {
+    const override = window.__API_BASE_URL__ || localStorage.getItem('API_BASE_URL');
+    if (override) return override.replace(/\/$/, '');
+
+    const { origin, pathname, port } = window.location;
+    // If running from VS Code Live Server (static), hit PHP dev server
+    if (port === '5500') return 'http://localhost:8000';
+    // If hosted under specific subfolders on Apache
+    if (pathname.startsWith('/ClassControl_LocalHost')) return origin + '/ClassControl_LocalHost';
+    if (pathname.startsWith('/ClassControl')) return origin + '/ClassControl';
+    // Default: same origin
+    return origin;
+}
+
+const API_BASE_URL = detectApiBase();
 
 /**
  * Petición a la API (JSON)
@@ -19,7 +34,7 @@ async function api(endpoint, options = {}) {
         showLoading(true);
         const resp = await fetch(url, config);
         if (!resp.ok) {
-            if (resp.status === 401) { window.location.href = '/index.html'; return { success: false, message: 'No autorizado' }; }
+            if (resp.status === 401) { window.location.href = `${API_BASE_URL}/public/index.html`; return { success: false, message: 'No autorizado' }; }
             const text = await resp.text();
             throw new Error(`HTTP ${resp.status} - ${text}`);
         }

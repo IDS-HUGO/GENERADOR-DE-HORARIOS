@@ -28,5 +28,5 @@ session_destroy();
 logInfo('User logged out');
 
 jsonResponse(true, 'Sesión cerrada', [
-    'redirect' => '/ClassControl_LocalHost/public/index.html'
+    'redirect' => baseUrl('public/index.html')
 ]);
