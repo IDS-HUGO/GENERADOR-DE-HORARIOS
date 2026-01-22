@@ -8,16 +8,24 @@ function detectApiBase() {
 
     const { origin, pathname } = window.location;
     
-    // Detectar dinámicamente basado en la estructura de carpetas
-    // Ej: /ClassControl/public o /GENERADOR-DE-HORARIOS/public
+    // Detectar carpeta del proyecto en la URL
+    // Patrones posibles:
+    // /ClassControl/public/index.html -> /ClassControl
+    // /GENERADOR-DE-HORARIOS/public/index.html -> /GENERADOR-DE-HORARIOS
+    // /public/index.html -> solo origin (desarrollo local)
+    
     const pathParts = pathname.split('/').filter(p => p);
     
-    // El primer elemento es la carpeta del proyecto
-    if (pathParts.length > 0 && pathParts[pathParts.length - 1] !== 'public') {
-        // Si estamos en /proyecto/public/..., usar /proyecto
+    // Buscar si hay 'public' en la ruta
+    const publicIndex = pathParts.indexOf('public');
+    
+    if (publicIndex > 0) {
+        // Hay carpeta del proyecto antes de 'public'
+        // /ClassControl/public/... -> retorna /ClassControl
         return origin + '/' + pathParts[0];
     }
     
+    // Si solo está /public/..., retorna origin
     return origin;
 }
 

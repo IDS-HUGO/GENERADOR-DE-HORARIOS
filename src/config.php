@@ -28,11 +28,21 @@ function getAppUrl() {
     $host = $_SERVER['HTTP_HOST'];
     $uri = $_SERVER['REQUEST_URI'];
     
-    // Obtener la carpeta raíz del proyecto (ej: /ClassControl o /GENERADOR-DE-HORARIOS)
-    $pathParts = explode('/', trim($uri, '/'));
-    $projectFolder = !empty($pathParts[0]) ? $pathParts[0] : '';
+    // Obtener la carpeta raíz del proyecto
+    // Desde /ClassControl/src/api/auth/login.php -> extrae /ClassControl
+    // Desde /GENERADOR-DE-HORARIOS/src/api/... -> extrae /GENERADOR-DE-HORARIOS
     
-    if ($projectFolder && $projectFolder !== 'public') {
+    $pathParts = explode('/', trim($uri, '/'));
+    
+    // El primer elemento es la carpeta del proyecto
+    $projectFolder = isset($pathParts[0]) && !empty($pathParts[0]) ? $pathParts[0] : '';
+    
+    // Si el primer elemento es "src", significa que estamos accediendo directamente
+    // Si el primer elemento NO es "src", "public", "admin", "docente", significa que es la carpeta del proyecto
+    $nonProjectPaths = ['src', 'public', 'admin', 'docente', 'database', 'logs', 'scripts'];
+    
+    if ($projectFolder && !in_array($projectFolder, $nonProjectPaths)) {
+        // Es el nombre de la carpeta del proyecto
         return $protocol . '://' . $host . '/' . $projectFolder;
     }
     

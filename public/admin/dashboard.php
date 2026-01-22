@@ -52,13 +52,57 @@ if (!in_array($section, $valid_sections)) $section = 'dashboard';
         document.addEventListener('DOMContentLoaded', () => {
             const btn = document.getElementById('logout-btn');
             if (btn) {
-                btn.addEventListener('click', () => {
-                    if (confirm('¿Desea cerrar sesión?')) {
-                        window.location.href = '<?php echo baseUrl('src/api/auth/logout.php'); ?>';
-                    }
-                });
+                btn.addEventListener('click', handleLogout);
             }
         });
+        
+        async function handleLogout() {
+            if (!confirm('¿Desea cerrar sesión?')) return;
+            
+            const btn = document.getElementById('logout-btn');
+            btn.disabled = true;
+            btn.textContent = '⏳ Cerrando...';
+            
+            try {
+                console.log('[LOGOUT] Iniciando...');
+                
+                // Llamar API de logout
+                const response = await fetch('<?php echo baseUrl("src/api/auth/logout.php"); ?>', {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                
+                const data = await response.json();
+                console.log('[LOGOUT] Respuesta:', data);
+                
+                if (data && data.success) {
+                    // Limpiar datos locales
+                    localStorage.clear();
+                    sessionStorage.clear();
+                    console.log('[LOGOUT] Datos locales limpiados');
+                    
+                    // Mostrar mensaje
+                    showAlert('✅ Sesión cerrada correctamente', 'success', 1500);
+                    
+                    // Redirigir al login
+                    setTimeout(() => {
+                        const redirectUrl = data.data?.redirect || '<?php echo baseUrl("public/index.html"); ?>';
+                        console.log('[LOGOUT] Redirigiendo a:', redirectUrl);
+                        window.location.href = redirectUrl;
+                    }, 1500);
+                } else {
+                    showAlert('❌ Error al cerrar sesión: ' + (data.message || 'desconocido'), 'danger', 3000);
+                    btn.disabled = false;
+                    btn.textContent = 'Salir';
+                }
+            } catch (error) {
+                console.error('[LOGOUT] Error:', error);
+                showAlert('❌ Error de conexión: ' + error.message, 'danger', 3000);
+                btn.disabled = false;
+                btn.textContent = 'Salir';
+            }
+        }
 
         function showAlert(type, message) {
             const container = document.getElementById('alert-container');

@@ -281,9 +281,38 @@ $user = getCurrentUser();
             event.target.classList.add('active');
         }
 
-        function logout() {
-            if (confirm('¿Seguro que deseas cerrar sesión?')) {
-                window.location.href = '../assets/js/logout.php';
+        async function logout() {
+            if (!confirm('¿Seguro que deseas cerrar sesión?')) return;
+            
+            try {
+                console.log('[LOGOUT] Iniciando...');
+                
+                // Llamar API de logout
+                const response = await fetch('<?php echo baseUrl("src/api/auth/logout.php"); ?>', {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                
+                const data = await response.json();
+                console.log('[LOGOUT] Respuesta:', data);
+                
+                if (data && data.success) {
+                    // Limpiar datos locales
+                    localStorage.clear();
+                    sessionStorage.clear();
+                    console.log('[LOGOUT] Datos locales limpiados');
+                    
+                    // Redirigir al login
+                    const redirectUrl = data.data?.redirect || '<?php echo baseUrl("public/index.html"); ?>';
+                    console.log('[LOGOUT] Redirigiendo a:', redirectUrl);
+                    window.location.href = redirectUrl;
+                } else {
+                    showAlert('Error al cerrar sesión: ' + (data.message || 'desconocido'), 'danger');
+                }
+            } catch (error) {
+                console.error('[LOGOUT] Error:', error);
+                showAlert('Error de conexión: ' + error.message, 'danger');
             }
         }
 
@@ -615,12 +644,6 @@ $user = getCurrentUser();
                 loadPersonalInfo();
             } catch (e) {
                 showAlert('Error al actualizar perfil', 'danger');
-            }
-        }
-
-        function logout() {
-            if (confirm('¿Desea cerrar sesión?')) {
-                window.location.href = '<?php echo baseUrl('src/api/auth/logout.php'); ?>';
             }
         }
     </script>

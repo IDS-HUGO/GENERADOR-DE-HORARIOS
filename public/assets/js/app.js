@@ -18,7 +18,8 @@
     // Detectar base URL dinámicamente
     const { origin, pathname } = window.location;
     const pathParts = pathname.split('/').filter(p => p);
-    const projectFolder = pathParts.length > 0 ? '/' + pathParts[0] : '';
+    const publicIndex = pathParts.indexOf('public');
+    const projectFolder = publicIndex > 0 ? '/' + pathParts[0] : '';
     
     script.src = projectFolder + '/public/assets/js/utils.js';
     script.onload = () => {

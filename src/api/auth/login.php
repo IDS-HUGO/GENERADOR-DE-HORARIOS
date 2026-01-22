@@ -43,12 +43,11 @@ try {
     $_SESSION['login_time'] = time();
 
     // Construir URL de redirección dinámicamente
-    $appPath = str_replace(['http://', 'https://'], '', APP_URL);
-    $appPath = str_replace($_SERVER['HTTP_HOST'], '', $appPath);
-    
+    // APP_URL ya tiene la carpeta del proyecto
+    // Ejemplo: http://localhost/ClassControl
     $redirect = ($user['tipo_usuario'] === 'docente') 
-        ? $appPath . '/public/docente/dashboard.php' 
-        : $appPath . '/public/admin/dashboard.php';
+        ? APP_URL . '/public/docente/dashboard.php' 
+        : APP_URL . '/public/admin/dashboard.php';
 
     error_log('[LOGIN] Éxito. Redirect: ' . $redirect);
 
