@@ -21,7 +21,25 @@ define('DB_PORT', 3306);
 define('PRODUCTION', true);
 define('APP_NAME', 'ClassControl');
 define('APP_VERSION', '1.0');
-define('APP_URL', 'http://localhost/ClassControl');
+
+// Detectar URL dinámicamente basado en la carpeta actual
+function getAppUrl() {
+    $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http';
+    $host = $_SERVER['HTTP_HOST'];
+    $uri = $_SERVER['REQUEST_URI'];
+    
+    // Obtener la carpeta raíz del proyecto (ej: /ClassControl o /GENERADOR-DE-HORARIOS)
+    $pathParts = explode('/', trim($uri, '/'));
+    $projectFolder = !empty($pathParts[0]) ? $pathParts[0] : '';
+    
+    if ($projectFolder && $projectFolder !== 'public') {
+        return $protocol . '://' . $host . '/' . $projectFolder;
+    }
+    
+    return $protocol . '://' . $host;
+}
+
+define('APP_URL', getAppUrl());
 
 // =====================================================
 // CONFIGURACIÓN DE SEGURIDAD

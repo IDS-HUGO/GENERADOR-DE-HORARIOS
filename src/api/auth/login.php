@@ -42,9 +42,13 @@ try {
     $_SESSION['tipo_usuario'] = $user['tipo_usuario'];
     $_SESSION['login_time'] = time();
 
+    // Construir URL de redirección dinámicamente
+    $appPath = str_replace(['http://', 'https://'], '', APP_URL);
+    $appPath = str_replace($_SERVER['HTTP_HOST'], '', $appPath);
+    
     $redirect = ($user['tipo_usuario'] === 'docente') 
-        ? '/ClassControl/public/docente/dashboard.php' 
-        : '/ClassControl/public/admin/dashboard.php';
+        ? $appPath . '/public/docente/dashboard.php' 
+        : $appPath . '/public/admin/dashboard.php';
 
     error_log('[LOGIN] Éxito. Redirect: ' . $redirect);
 

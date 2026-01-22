@@ -6,11 +6,18 @@ function detectApiBase() {
     const override = window.__API_BASE_URL__ || localStorage.getItem('API_BASE_URL');
     if (override) return override.replace(/\/$/, '');
 
-    const { origin, pathname, port } = window.location;
+    const { origin, pathname } = window.location;
     
-    if (port === '5500') return 'http://localhost:8000';
-    if (pathname.startsWith('/ClassControl')) return origin + '/ClassControl';
-    if (pathname.startsWith('/ClassControl_LocalHost')) return origin + '/ClassControl_LocalHost';
+    // Detectar dinámicamente basado en la estructura de carpetas
+    // Ej: /ClassControl/public o /GENERADOR-DE-HORARIOS/public
+    const pathParts = pathname.split('/').filter(p => p);
+    
+    // El primer elemento es la carpeta del proyecto
+    if (pathParts.length > 0 && pathParts[pathParts.length - 1] !== 'public') {
+        // Si estamos en /proyecto/public/..., usar /proyecto
+        return origin + '/' + pathParts[0];
+    }
+    
     return origin;
 }
 

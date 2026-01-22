@@ -35,10 +35,13 @@ async function handleLogin(e) {
             
             const msg = '✅ ¡Bienvenido ' + (response.nombre || 'Usuario') + '!';
             showAlert(msg, 'success', 1000);
-            console.log('[LOGIN] Redirect a:', response.redirect);
+            
+            // Usar redirect del servidor (dinámico)
+            const redirectUrl = response.redirect || window.location.origin + '/public/admin/dashboard.php';
+            console.log('[LOGIN] Redirect a:', redirectUrl);
             
             setTimeout(() => {
-                window.location.href = response.redirect || '/ClassControl/public/admin/dashboard.php';
+                window.location.href = redirectUrl;
             }, 1000);
         } else {
             const errorMsg = response?.message || 'Error desconocido';
