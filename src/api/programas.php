@@ -3,10 +3,10 @@
  * API de Programas Académicos - Gestión completa
  */
 
-require_once '../../config.php';
+require_once '../config.php';
 
 if (!isAuthenticated()) {
-    jsonResponse(['error' => 'No autorizado'], 401);
+    jsonResponse(false, 'No autorizado', null, 401);
 }
 
 $action = $_GET['action'] ?? '';
@@ -16,22 +16,22 @@ try {
     switch ($action) {
         case 'list':
             $programas = (new ProgramaAcademico())->getActivos();
-            jsonResponse(['success' => true, 'data' => $programas]);
+            jsonResponse(true, '', $programas);
             break;
 
         case 'get':
             $id = $_GET['id'] ?? null;
-            if (!$id) jsonResponse(['error' => 'ID requerido'], 400);
+            if (!$id) jsonResponse(false, 'ID requerido', null, 400);
             
             $programa = (new ProgramaAcademico())->getById($id);
-            if (!$programa) jsonResponse(['error' => 'Programa no encontrado'], 404);
+            if (!$programa) jsonResponse(false, 'Programa no encontrado', null, 404);
             
-            jsonResponse(['success' => true, 'data' => $programa]);
+            jsonResponse(true, '', $programa);
             break;
 
         case 'create':
             if ($user['tipo'] !== 'admin') {
-                jsonResponse(['error' => 'Solo administradores pueden crear programas'], 403);
+                jsonResponse(false, 'Solo administradores pueden crear programas', null, 403);
             }
             
             $data = json_decode(file_get_contents('php://input'), true);
@@ -39,12 +39,12 @@ try {
             $campos = ['codigo', 'nombre', 'nivel'];
             foreach ($campos as $campo) {
                 if (empty($data[$campo])) {
-                    jsonResponse(['error' => "El campo $campo es requerido"], 400);
+                    jsonResponse(false, "El campo $campo es requerido", null, 400);
                 }
             }
             
             if ((new ProgramaAcademico())->getByCodigo($data['codigo'])) {
-                jsonResponse(['error' => 'El código del programa ya existe'], 409);
+                jsonResponse(false, 'El código del programa ya existe', null, 409);
             }
             
             $id = (new ProgramaAcademico())->create([
@@ -56,21 +56,21 @@ try {
                 'estado' => 'activo'
             ]);
             
-            jsonResponse(['success' => true, 'id' => $id, 'message' => 'Programa creado correctamente']);
+            jsonResponse(true, 'Programa creado correctamente', ['id' => $id]);
             break;
 
         case 'update':
             if ($user['tipo'] !== 'admin') {
-                jsonResponse(['error' => 'Solo administradores pueden editar programas'], 403);
+                jsonResponse(false, 'Solo administradores pueden editar programas', null, 403);
             }
             
             $data = json_decode(file_get_contents('php://input'), true);
             $id = $data['id'] ?? null;
             
-            if (!$id) jsonResponse(['error' => 'ID requerido'], 400);
+            if (!$id) jsonResponse(false, 'ID requerido', null, 400);
             
             if (!(new ProgramaAcademico())->getById($id)) {
-                jsonResponse(['error' => 'Programa no encontrado'], 404);
+                jsonResponse(false, 'Programa no encontrado', null, 404);
             }
             
             $updateData = array_filter([
@@ -84,25 +84,25 @@ try {
                 (new ProgramaAcademico())->update($id, $updateData);
             }
             
-            jsonResponse(['success' => true, 'message' => 'Programa actualizado correctamente']);
+            jsonResponse(true, 'Programa actualizado correctamente');
             break;
 
         case 'delete':
             if ($user['tipo'] !== 'admin') {
-                jsonResponse(['error' => 'Solo administradores pueden eliminar programas'], 403);
+                jsonResponse(false, 'Solo administradores pueden eliminar programas', null, 403);
             }
             
             $id = $_GET['id'] ?? null;
-            if (!$id) jsonResponse(['error' => 'ID requerido'], 400);
+            if (!$id) jsonResponse(false, 'ID requerido', null, 400);
             
             (new ProgramaAcademico())->update($id, ['estado' => 'inactivo']);
-            jsonResponse(['success' => true, 'message' => 'Programa desactivado correctamente']);
+            jsonResponse(true, 'Programa desactivado correctamente');
             break;
 
         default:
-            jsonResponse(['error' => 'Acción no válida'], 400);
+            jsonResponse(false, 'Acción no válida', null, 400);
     }
 } catch (Exception $e) {
     logError($e);
-    jsonResponse(['error' => 'Error en servidor'], 500);
+    jsonResponse(false, 'Error en servidor', null, 500);
 }

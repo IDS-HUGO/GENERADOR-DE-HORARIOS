@@ -3,10 +3,10 @@
  * API de Grupos - Gestión completa
  */
 
-require_once '../../config.php';
+require_once '../config.php';
 
 if (!isAuthenticated()) {
-    jsonResponse(['error' => 'No autorizado'], 401);
+    jsonResponse(false, 'No autorizado', null, 401);
 }
 
 $action = $_GET['action'] ?? '';
@@ -23,22 +23,22 @@ try {
                 $grupos = (new Grupo())->getActivos();
             }
             
-            jsonResponse(['success' => true, 'data' => $grupos]);
+            jsonResponse(true, '', $grupos);
             break;
 
         case 'get':
             $id = $_GET['id'] ?? null;
-            if (!$id) jsonResponse(['error' => 'ID requerido'], 400);
+            if (!$id) jsonResponse(false, 'ID requerido', null, 400);
             
             $grupo = (new Grupo())->getById($id);
-            if (!$grupo) jsonResponse(['error' => 'Grupo no encontrado'], 404);
+            if (!$grupo) jsonResponse(false, 'Grupo no encontrado', null, 404);
             
-            jsonResponse(['success' => true, 'data' => $grupo]);
+            jsonResponse(true, '', $grupo);
             break;
 
         case 'create':
             if ($user['tipo'] !== 'admin') {
-                jsonResponse(['error' => 'Solo administradores pueden crear grupos'], 403);
+                jsonResponse(false, 'Solo administradores pueden crear grupos', null, 403);
             }
             
             $data = json_decode(file_get_contents('php://input'), true);
@@ -46,7 +46,7 @@ try {
             $campos = ['codigo', 'nombre', 'programa_id', 'semestre', 'cantidad_estudiantes'];
             foreach ($campos as $campo) {
                 if (empty($data[$campo]) && $data[$campo] !== 0) {
-                    jsonResponse(['error' => "El campo $campo es requerido"], 400);
+                    jsonResponse(false, "El campo $campo es requerido", null, 400);
                 }
             }
             
@@ -61,21 +61,21 @@ try {
                 'estado' => 'activo'
             ]);
             
-            jsonResponse(['success' => true, 'id' => $id, 'message' => 'Grupo creado correctamente']);
+            jsonResponse(true, 'Grupo creado correctamente', ['id' => $id]);
             break;
 
         case 'update':
             if ($user['tipo'] !== 'admin') {
-                jsonResponse(['error' => 'Solo administradores pueden editar grupos'], 403);
+                jsonResponse(false, 'Solo administradores pueden editar grupos', null, 403);
             }
             
             $data = json_decode(file_get_contents('php://input'), true);
             $id = $data['id'] ?? null;
             
-            if (!$id) jsonResponse(['error' => 'ID requerido'], 400);
+            if (!$id) jsonResponse(false, 'ID requerido', null, 400);
             
             if (!(new Grupo())->getById($id)) {
-                jsonResponse(['error' => 'Grupo no encontrado'], 404);
+                jsonResponse(false, 'Grupo no encontrado', null, 404);
             }
             
             $updateData = array_filter([
@@ -90,25 +90,25 @@ try {
                 (new Grupo())->update($id, $updateData);
             }
             
-            jsonResponse(['success' => true, 'message' => 'Grupo actualizado correctamente']);
+            jsonResponse(true, 'Grupo actualizado correctamente');
             break;
 
         case 'delete':
             if ($user['tipo'] !== 'admin') {
-                jsonResponse(['error' => 'Solo administradores pueden eliminar grupos'], 403);
+                jsonResponse(false, 'Solo administradores pueden eliminar grupos', null, 403);
             }
             
             $id = $_GET['id'] ?? null;
-            if (!$id) jsonResponse(['error' => 'ID requerido'], 400);
+            if (!$id) jsonResponse(false, 'ID requerido', null, 400);
             
             (new Grupo())->update($id, ['estado' => 'inactivo']);
-            jsonResponse(['success' => true, 'message' => 'Grupo desactivado correctamente']);
+            jsonResponse(true, 'Grupo desactivado correctamente');
             break;
 
         default:
-            jsonResponse(['error' => 'Acción no válida'], 400);
+            jsonResponse(false, 'Acción no válida', null, 400);
     }
 } catch (Exception $e) {
     logError($e);
-    jsonResponse(['error' => 'Error en servidor'], 500);
+    jsonResponse(false, 'Error en servidor', null, 500);
 }

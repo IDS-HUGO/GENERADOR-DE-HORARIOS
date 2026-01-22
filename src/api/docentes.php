@@ -3,10 +3,10 @@
  * API de Docentes - Gestión completa
  */
 
-require_once '../../config.php';
+require_once '../config.php';
 
 if (!isAuthenticated()) {
-    jsonResponse(['error' => 'No autorizado'], 401);
+    jsonResponse(false, 'No autorizado', null, 401);
 }
 
 $action = $_GET['action'] ?? '';
@@ -15,24 +15,23 @@ $user = getCurrentUser();
 try {
     switch ($action) {
         case 'list':
-            // Listar todos los docentes
             $docentes = (new Docente())->getActivosConUsuario();
-            jsonResponse(['success' => true, 'data' => $docentes]);
+            jsonResponse(true, '', $docentes);
             break;
 
         case 'get':
             $id = $_GET['id'] ?? null;
-            if (!$id) jsonResponse(['error' => 'ID requerido'], 400);
+            if (!$id) jsonResponse(false, 'ID requerido', null, 400);
             
             $docente = (new Docente())->getById($id);
-            if (!$docente) jsonResponse(['error' => 'Docente no encontrado'], 404);
+            if (!$docente) jsonResponse(false, 'Docente no encontrado', null, 404);
             
-            jsonResponse(['success' => true, 'data' => $docente]);
+            jsonResponse(true, '', $docente);
             break;
 
         case 'create':
             if ($user['tipo'] !== 'admin') {
-                jsonResponse(['error' => 'Solo administradores pueden crear docentes'], 403);
+                jsonResponse(false, 'Solo administradores pueden crear docentes', null, 403);
             }
             
             $data = json_decode(file_get_contents('php://input'), true);
@@ -41,13 +40,13 @@ try {
             $campos = ['nombre', 'apellido', 'email', 'especialidad', 'telefono'];
             foreach ($campos as $campo) {
                 if (empty($data[$campo])) {
-                    jsonResponse(['error' => "El campo $campo es requerido"], 400);
+                    jsonResponse(false, "El campo $campo es requerido", null, 400);
                 }
             }
             
             // Validar email único
             if ((new Usuario())->getByEmail($data['email'])) {
-                jsonResponse(['error' => 'El email ya está registrado'], 409);
+                jsonResponse(false, 'El email ya está registrado', null, 409);
             }
             
             // Crear usuario
@@ -73,21 +72,21 @@ try {
             // Crear disponibilidad inicial
             (new DisponibilidadHoraria())->createInitialAvailability($docenteId);
             
-            jsonResponse(['success' => true, 'id' => $docenteId, 'message' => 'Docente creado correctamente']);
+            jsonResponse(true, 'Docente creado correctamente', ['id' => $docenteId]);
             break;
 
         case 'update':
             if ($user['tipo'] !== 'admin') {
-                jsonResponse(['error' => 'Solo administradores pueden editar docentes'], 403);
+                jsonResponse(false, 'Solo administradores pueden editar docentes', null, 403);
             }
             
             $data = json_decode(file_get_contents('php://input'), true);
             $id = $data['id'] ?? null;
             
-            if (!$id) jsonResponse(['error' => 'ID requerido'], 400);
+            if (!$id) jsonResponse(false, 'ID requerido', null, 400);
             
             $docente = (new Docente())->getById($id);
-            if (!$docente) jsonResponse(['error' => 'Docente no encontrado'], 404);
+            if (!$docente) jsonResponse(false, 'Docente no encontrado', null, 404);
             
             // Actualizar datos
             $updateData = array_filter([
@@ -102,25 +101,25 @@ try {
                 (new Docente())->update($id, $updateData);
             }
             
-            jsonResponse(['success' => true, 'message' => 'Docente actualizado correctamente']);
+            jsonResponse(true, 'Docente actualizado correctamente');
             break;
 
         case 'delete':
             if ($user['tipo'] !== 'admin') {
-                jsonResponse(['error' => 'Solo administradores pueden eliminar docentes'], 403);
+                jsonResponse(false, 'Solo administradores pueden eliminar docentes', null, 403);
             }
             
             $id = $_GET['id'] ?? null;
-            if (!$id) jsonResponse(['error' => 'ID requerido'], 400);
+            if (!$id) jsonResponse(false, 'ID requerido', null, 400);
             
             (new Docente())->update($id, ['estado' => 'inactivo']);
-            jsonResponse(['success' => true, 'message' => 'Docente desactivado correctamente']);
+            jsonResponse(true, 'Docente desactivado correctamente');
             break;
 
         default:
-            jsonResponse(['error' => 'Acción no válida'], 400);
+            jsonResponse(false, 'Acción no válida', null, 400);
     }
 } catch (Exception $e) {
     logError($e);
-    jsonResponse(['error' => 'Error en servidor'], 500);
+    jsonResponse(false, 'Error en servidor', null, 500);
 }

@@ -12,26 +12,98 @@ $user = getCurrentUser();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mi Dashboard - ClassControl</title>
+    <title>Mi Portal - ClassControl</title>
     <link rel="stylesheet" href="../assets/css/style.css">
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .navbar { flex-shrink: 0; }
+
+        main {
+            flex: 1;
+            padding: 30px 20px;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .page-header h1 {
+            font-size: 2rem;
+            color: var(--text-primary);
+        }
+
+        .section {
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .section.hidden {
+            display: none;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .welcome-banner {
+            background: linear-gradient(135deg, var(--primary), var(--accent-salmon));
+            border-radius: 12px;
+            padding: 30px;
+            color: white;
+            margin-bottom: 30px;
+            box-shadow: var(--shadow-md);
+        }
+
+        .welcome-banner h2 {
+            font-size: 1.75rem;
+            margin-bottom: 10px;
+        }
+
+        .schedule-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .schedule-item {
+            background: var(--bg-card);
+            border-left: 4px solid var(--primary);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        .schedule-item.completed {
+            opacity: 0.7;
+            border-left-color: var(--success);
+        }
+    </style>
 </head>
 <body>
     <!-- NAVBAR -->
     <nav class="navbar">
         <div class="navbar-container">
-            <div class="navbar-brand">ClassControl Docente</div>
+            <div class="navbar-brand">🎓 ClassControl Docente</div>
             <ul class="navbar-menu">
-                <li><a href="#" onclick="loadSection('inicio')" class="active">Inicio</a></li>
-                <li><a href="#" onclick="loadSection('horario')">Mi Horario</a></li>
-                <li><a href="#" onclick="loadSection('disponibilidad')">Disponibilidad</a></li>
-                <li><a href="#" onclick="loadSection('materias')">Mis Materias</a></li>
+                <li><a href="#" onclick="loadSection('inicio')" class="nav-link active">🏠 Inicio</a></li>
+                <li><a href="#" onclick="loadSection('horario')" class="nav-link">📅 Mi Horario</a></li>
+                <li><a href="#" onclick="loadSection('disponibilidad')" class="nav-link">⏰ Disponibilidad</a></li>
+                <li><a href="#" onclick="loadSection('materias')" class="nav-link">📖 Mis Materias</a></li>
             </ul>
             <div class="navbar-user">
                 <div class="user-info">
                     <div class="user-name"><?php echo htmlspecialchars($user['nombre'] ?? 'Docente'); ?></div>
-                    <div class="user-role">Docente</div>
+                    <div class="user-role">👨‍🏫 Docente</div>
                 </div>
-                <button class="btn-logout" onclick="logout()">Cerrar sesión</button>
+                <button class="btn-logout" onclick="logout()">Salir</button>
             </div>
         </div>
     </nav>
@@ -40,14 +112,193 @@ $user = getCurrentUser();
     <main class="container">
         <!-- INICIO SECTION -->
         <div id="inicio" class="section">
-            <div class="grid grid-2 mb-5">
+            <div class="welcome-banner">
+                <h2>🎉 ¡Bienvenido, <?php echo htmlspecialchars(ucfirst($user['nombre'] ?? 'Docente')); ?>!</h2>
+                <p>Tu portal de gestión de horarios y disponibilidad está listo para usar.</p>
+            </div>
+
+            <div class="grid grid-3 mb-5">
+                <div class="stat-card primary">
+                    <div class="stat-label">📚 Materias</div>
+                    <div class="stat-value" id="stat-materias">0</div>
+                </div>
+                <div class="stat-card success">
+                    <div class="stat-label">👥 Grupos</div>
+                    <div class="stat-value" id="stat-grupos">0</div>
+                </div>
+                <div class="stat-card warning">
+                    <div class="stat-label">📅 Clases Semanales</div>
+                    <div class="stat-value" id="stat-clases">0</div>
+                </div>
+            </div>
+
+            <div class="grid grid-2">
                 <div class="card">
                     <div class="card-header">
-                        <h3 class="card-title">Información Personal</h3>
+                        <h3 class="card-title">ℹ️ Información Personal</h3>
                     </div>
                     <div class="card-body">
                         <p><strong>Nombre:</strong> <span id="info-nombre"><?php echo htmlspecialchars($user['nombre'] ?? ''); ?></span></p>
                         <p><strong>Apellido:</strong> <span id="info-apellido"><?php echo htmlspecialchars($user['apellido'] ?? ''); ?></span></p>
+                        <p><strong>Email:</strong> <span id="info-email"><?php echo htmlspecialchars($user['email'] ?? ''); ?></span></p>
+                        <p><strong>Teléfono:</strong> <span id="info-telefono">Por cargar</span></p>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">⚡ Acciones Rápidas</h3>
+                    </div>
+                    <div class="card-body">
+                        <div style="display: flex; flex-direction: column; gap: 10px;">
+                            <button class="btn btn-primary btn-block" onclick="loadSection('disponibilidad')">
+                                ⏰ Editar Disponibilidad
+                            </button>
+                            <button class="btn btn-secondary btn-block" onclick="loadSection('horario')">
+                                📅 Ver Mi Horario
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- HORARIO SECTION -->
+        <div id="horario" class="section hidden">
+            <div class="page-header">
+                <h1>📅 Mi Horario</h1>
+            </div>
+
+            <div class="card">
+                <div class="card-body">
+                    <table class="table" id="table-horario">
+                        <thead>
+                            <tr>
+                                <th>📖 Materia</th>
+                                <th>👥 Grupo</th>
+                                <th>📆 Día</th>
+                                <th>⏰ Hora Inicio</th>
+                                <th>⏰ Hora Fin</th>
+                                <th>🏫 Aula</th>
+                            </tr>
+                        </thead>
+                        <tbody id="horario-tbody">
+                            <tr><td colspan="6" class="text-center text-muted">Cargando horario...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- DISPONIBILIDAD SECTION -->
+        <div id="disponibilidad" class="section hidden">
+            <div class="page-header">
+                <h1>⏰ Editar Disponibilidad</h1>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Selecciona tus horarios disponibles</h3>
+                </div>
+                <div class="card-body">
+                    <form id="form-disponibilidad">
+                        <div class="grid grid-2 mb-4">
+                            <div class="form-group">
+                                <label>Día de la Semana</label>
+                                <select name="dia_semana" required>
+                                    <option value="">Selecciona un día</option>
+                                    <option value="lunes">Lunes</option>
+                                    <option value="martes">Martes</option>
+                                    <option value="miercoles">Miércoles</option>
+                                    <option value="jueves">Jueves</option>
+                                    <option value="viernes">Viernes</option>
+                                </select>
+                            </div>
+                            <div></div>
+                        </div>
+
+                        <div class="grid grid-2 mb-4">
+                            <div class="form-group">
+                                <label>Hora Inicio</label>
+                                <input type="time" name="hora_inicio" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Hora Fin</label>
+                                <input type="time" name="hora_fin" required>
+                            </div>
+                        </div>
+
+                        <div class="form-check">
+                            <input type="checkbox" id="disponible" name="disponible" checked>
+                            <label for="disponible">Estoy disponible en estos horarios</label>
+                        </div>
+
+                        <div class="btn-group" style="margin-top: 20px;">
+                            <button type="submit" class="btn btn-primary">💾 Guardar Disponibilidad</button>
+                            <button type="reset" class="btn btn-secondary">🔄 Limpiar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- MATERIAS SECTION -->
+        <div id="materias" class="section hidden">
+            <div class="page-header">
+                <h1>📖 Mis Materias</h1>
+            </div>
+
+            <div class="card">
+                <div class="card-body">
+                    <table class="table" id="table-materias">
+                        <thead>
+                            <tr>
+                                <th>📖 Código</th>
+                                <th>📚 Nombre</th>
+                                <th>👥 Grupos</th>
+                                <th>⭐ Créditos</th>
+                                <th>👨 Estudiantes</th>
+                            </tr>
+                        </thead>
+                        <tbody id="materias-tbody">
+                            <tr><td colspan="5" class="text-center text-muted">Cargando materias...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="../assets/js/utils.js"></script>
+    <script>
+        function loadSection(sectionId) {
+            // Ocultar todas las secciones
+            document.querySelectorAll('.section').forEach(s => s.classList.add('hidden'));
+            document.querySelectorAll('.nav-link').forEach(n => n.classList.remove('active'));
+            
+            // Mostrar sección seleccionada
+            document.getElementById(sectionId).classList.remove('hidden');
+            event.target.classList.add('active');
+        }
+
+        function logout() {
+            if (confirm('¿Seguro que deseas cerrar sesión?')) {
+                window.location.href = '../assets/js/logout.php';
+            }
+        }
+
+        // Inicializar
+        document.addEventListener('DOMContentLoaded', () => {
+            // Cargar estadísticas (simulado)
+            setTimeout(() => {
+                document.getElementById('stat-materias').textContent = '3';
+                document.getElementById('stat-grupos').textContent = '5';
+                document.getElementById('stat-clases').textContent = '12';
+            }, 500);
+        });
+    </script>
+</body>
+</html>
                         <p><strong>Email:</strong> <span id="info-email"><?php echo htmlspecialchars($user['email'] ?? ''); ?></span></p>
                         <p><strong>Teléfono:</strong> <span id="info-telefono">Cargando...</span></p>
                         <p><strong>Especialidad:</strong> <span id="info-especialidad">Cargando...</span></p>
@@ -373,5 +624,17 @@ $user = getCurrentUser();
             }
         }
     </script>
+    <script src="../assets/js/app.js"></script>
+    <script src="../assets/js/utils.js"></script>
+    <script src="../assets/js/helpers.js"></script>
+    <script src="../assets/js/dashboard-api.js"></script>
+    <script src="../assets/js/modules/reportes.js"></script>
+    <script src="../assets/js/modules/busqueda.js"></script>
+    <script src="../assets/js/modules/notificaciones.js"></script>
+    <script src="../assets/js/modules/estadisticas.js"></script>
+    <script src="../assets/js/modules/cache.js"></script>
+    <script src="../assets/js/modules/horarios-avanzados.js"></script>
+    <script src="../assets/js/modules/usuarios-avanzados.js"></script>
+    <script src="../assets/js/modules/reportes-avanzados.js"></script>
 </body>
 </html>

@@ -3,10 +3,10 @@
  * API de Materias - Gestión completa
  */
 
-require_once '../../config.php';
+require_once '../config.php';
 
 if (!isAuthenticated()) {
-    jsonResponse(['error' => 'No autorizado'], 401);
+    jsonResponse(false, 'No autorizado', null, 401);
 }
 
 $action = $_GET['action'] ?? '';
@@ -23,22 +23,22 @@ try {
                 $materias = (new Materia())->getAll();
             }
             
-            jsonResponse(['success' => true, 'data' => $materias]);
+            jsonResponse(true, '', $materias);
             break;
 
         case 'get':
             $id = $_GET['id'] ?? null;
-            if (!$id) jsonResponse(['error' => 'ID requerido'], 400);
+            if (!$id) jsonResponse(false, 'ID requerido', null, 400);
             
             $materia = (new Materia())->getById($id);
-            if (!$materia) jsonResponse(['error' => 'Materia no encontrada'], 404);
+            if (!$materia) jsonResponse(false, 'Materia no encontrada', null, 404);
             
-            jsonResponse(['success' => true, 'data' => $materia]);
+            jsonResponse(true, '', $materia);
             break;
 
         case 'create':
             if ($user['tipo'] !== 'admin') {
-                jsonResponse(['error' => 'Solo administradores pueden crear materias'], 403);
+                jsonResponse(false, 'Solo administradores pueden crear materias', null, 403);
             }
             
             $data = json_decode(file_get_contents('php://input'), true);
@@ -46,13 +46,13 @@ try {
             $campos = ['codigo', 'nombre', 'programa_id', 'creditos', 'semestre'];
             foreach ($campos as $campo) {
                 if (empty($data[$campo])) {
-                    jsonResponse(['error' => "El campo $campo es requerido"], 400);
+                    jsonResponse(false, "El campo $campo es requerido", null, 400);
                 }
             }
             
             // Validar código único
             if ((new Materia())->getByCodigo($data['codigo'])) {
-                jsonResponse(['error' => 'El código de materia ya existe'], 409);
+                jsonResponse(false, 'El código de materia ya existe', null, 409);
             }
             
             $id = (new Materia())->create([
@@ -66,21 +66,21 @@ try {
                 'estado' => 'activo'
             ]);
             
-            jsonResponse(['success' => true, 'id' => $id, 'message' => 'Materia creada correctamente']);
+            jsonResponse(true, 'Materia creada correctamente', ['id' => $id]);
             break;
 
         case 'update':
             if ($user['tipo'] !== 'admin') {
-                jsonResponse(['error' => 'Solo administradores pueden editar materias'], 403);
+                jsonResponse(false, 'Solo administradores pueden editar materias', null, 403);
             }
             
             $data = json_decode(file_get_contents('php://input'), true);
             $id = $data['id'] ?? null;
             
-            if (!$id) jsonResponse(['error' => 'ID requerido'], 400);
+            if (!$id) jsonResponse(false, 'ID requerido', null, 400);
             
             if (!(new Materia())->getById($id)) {
-                jsonResponse(['error' => 'Materia no encontrada'], 404);
+                jsonResponse(false, 'Materia no encontrada', null, 404);
             }
             
             $updateData = array_filter([
@@ -95,25 +95,25 @@ try {
                 (new Materia())->update($id, $updateData);
             }
             
-            jsonResponse(['success' => true, 'message' => 'Materia actualizada correctamente']);
+            jsonResponse(true, 'Materia actualizada correctamente');
             break;
 
         case 'delete':
             if ($user['tipo'] !== 'admin') {
-                jsonResponse(['error' => 'Solo administradores pueden eliminar materias'], 403);
+                jsonResponse(false, 'Solo administradores pueden eliminar materias', null, 403);
             }
             
             $id = $_GET['id'] ?? null;
-            if (!$id) jsonResponse(['error' => 'ID requerido'], 400);
+            if (!$id) jsonResponse(false, 'ID requerido', null, 400);
             
             (new Materia())->update($id, ['estado' => 'inactivo']);
-            jsonResponse(['success' => true, 'message' => 'Materia desactivada correctamente']);
+            jsonResponse(true, 'Materia desactivada correctamente');
             break;
 
         default:
-            jsonResponse(['error' => 'Acción no válida'], 400);
+            jsonResponse(false, 'Acción no válida', null, 400);
     }
 } catch (Exception $e) {
     logError($e);
-    jsonResponse(['error' => 'Error en servidor'], 500);
+    jsonResponse(false, 'Error en servidor', null, 500);
 }

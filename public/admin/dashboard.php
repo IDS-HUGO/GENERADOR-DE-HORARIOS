@@ -12,27 +12,66 @@ $user = getCurrentUser();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel de Administración - ClassControl</title>
+    <title>Panel Administrativo - ClassControl</title>
     <link rel="stylesheet" href="../assets/css/style.css">
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .navbar { flex-shrink: 0; }
+
+        main {
+            flex: 1;
+            padding: 30px 20px;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .page-header h1 {
+            font-size: 2rem;
+            color: var(--text-primary);
+        }
+
+        .section {
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .section.hidden {
+            display: none;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+    </style>
 </head>
 <body>
     <!-- NAVBAR -->
     <nav class="navbar">
         <div class="navbar-container">
-            <div class="navbar-brand">ClassControl Admin</div>
+            <div class="navbar-brand">🎓 ClassControl Admin</div>
             <ul class="navbar-menu">
-                <li><a href="#" onclick="loadSection('dashboard')" class="active">Dashboard</a></li>
-                <li><a href="#" onclick="loadSection('docentes')">Docentes</a></li>
-                <li><a href="#" onclick="loadSection('programas')">Programas</a></li>
-                <li><a href="#" onclick="loadSection('materias')">Materias</a></li>
-                <li><a href="#" onclick="loadSection('grupos')">Grupos</a></li>
+                <li><a href="#" onclick="loadSection('dashboard')" class="nav-link active">📊 Dashboard</a></li>
+                <li><a href="#" onclick="loadSection('docentes')" class="nav-link">👨‍🏫 Docentes</a></li>
+                <li><a href="#" onclick="loadSection('programas')" class="nav-link">📚 Programas</a></li>
+                <li><a href="#" onclick="loadSection('materias')" class="nav-link">📖 Materias</a></li>
+                <li><a href="#" onclick="loadSection('grupos')" class="nav-link">👥 Grupos</a></li>
             </ul>
             <div class="navbar-user">
                 <div class="user-info">
                     <div class="user-name"><?php echo htmlspecialchars($user['nombre'] ?? 'Admin'); ?></div>
-                    <div class="user-role">Administrador</div>
+                    <div class="user-role">👤 Administrador</div>
                 </div>
-                <button class="btn-logout" onclick="logout()">Cerrar sesión</button>
+                <button class="btn-logout" onclick="logout()">Salir</button>
             </div>
         </div>
     </nav>
@@ -41,23 +80,26 @@ $user = getCurrentUser();
     <main class="container">
         <!-- DASHBOARD SECTION -->
         <div id="dashboard" class="section">
-            <h2 class="mb-4">Panel de Control</h2>
+            <div class="page-header">
+                <h1>Panel de Control</h1>
+                <span class="text-muted" id="current-date"></span>
+            </div>
             
             <div class="grid grid-4 mb-5">
                 <div class="stat-card primary">
-                    <div class="stat-label">Docentes Activos</div>
+                    <div class="stat-label">👨‍🏫 Docentes</div>
                     <div class="stat-value" id="stat-docentes">0</div>
                 </div>
                 <div class="stat-card success">
-                    <div class="stat-label">Programas</div>
+                    <div class="stat-label">📚 Programas</div>
                     <div class="stat-value" id="stat-programas">0</div>
                 </div>
                 <div class="stat-card warning">
-                    <div class="stat-label">Materias</div>
+                    <div class="stat-label">📖 Materias</div>
                     <div class="stat-value" id="stat-materias">0</div>
                 </div>
-                <div class="stat-card danger">
-                    <div class="stat-label">Grupos</div>
+                <div class="stat-card" style="border-left: 4px solid var(--info);">
+                    <div class="stat-label">👥 Grupos</div>
                     <div class="stat-value" id="stat-grupos">0</div>
                 </div>
             </div>
@@ -65,17 +107,17 @@ $user = getCurrentUser();
             <div class="grid grid-2 mb-5">
                 <div class="card">
                     <div class="card-header">
-                        <h3 class="card-title">Acciones Rápidas</h3>
+                        <h3 class="card-title">⚡ Acciones Rápidas</h3>
                     </div>
                     <div class="card-body">
-                        <div class="d-flex gap-2" style="flex-direction: column;">
-                            <button class="btn btn-primary w-100" onclick="showModal('modal-docente')">
+                        <div style="display: flex; flex-direction: column; gap: 10px;">
+                            <button class="btn btn-primary btn-block" onclick="showModal('modal-docente')">
                                 ➕ Registrar Docente
                             </button>
-                            <button class="btn btn-secondary w-100" onclick="showModal('modal-programa')">
+                            <button class="btn btn-secondary btn-block" onclick="showModal('modal-programa')">
                                 ➕ Crear Programa
                             </button>
-                            <button class="btn btn-success w-100" onclick="showModal('modal-materia')">
+                            <button class="btn btn-success btn-block" onclick="showModal('modal-materia')">
                                 ➕ Agregar Materia
                             </button>
                         </div>
@@ -84,13 +126,13 @@ $user = getCurrentUser();
 
                 <div class="card">
                     <div class="card-header">
-                        <h3 class="card-title">Información del Sistema</h3>
+                        <h3 class="card-title">ℹ️ Información del Sistema</h3>
                     </div>
                     <div class="card-body">
                         <p><strong>Versión:</strong> ClassControl 1.0</p>
-                        <p><strong>Estado:</strong> <span class="text-success text-bold">Producción</span></p>
+                        <p><strong>Estado:</strong> <span class="text-success font-bold">✓ Producción</span></p>
                         <p><strong>Última actualización:</strong> <span id="last-update">Hoy</span></p>
-                        <p class="text-muted">Contacto: admin@classcontrol.com</p>
+                        <p class="text-muted text-sm">Contacto: soporte@classcontrol.com</p>
                     </div>
                 </div>
             </div>
@@ -98,8 +140,8 @@ $user = getCurrentUser();
 
         <!-- DOCENTES SECTION -->
         <div id="docentes" class="section hidden">
-            <div class="d-flex flex-between items-center mb-4">
-                <h2>Gestión de Docentes</h2>
+            <div class="page-header">
+                <h1>Gestión de Docentes</h1>
                 <button class="btn btn-primary" onclick="showModal('modal-docente')">➕ Nuevo Docente</button>
             </div>
 
@@ -108,12 +150,12 @@ $user = getCurrentUser();
                     <table class="table" id="table-docentes">
                         <thead>
                             <tr>
-                                <th>Nombre</th>
-                                <th>Email</th>
-                                <th>Especialidad</th>
-                                <th>Teléfono</th>
-                                <th>Estado</th>
-                                <th>Acciones</th>
+                                <th>👤 Nombre</th>
+                                <th>📧 Email</th>
+                                <th>🎓 Especialidad</th>
+                                <th>📱 Teléfono</th>
+                                <th>✓ Estado</th>
+                                <th>⚙️ Acciones</th>
                             </tr>
                         </thead>
                         <tbody id="docentes-tbody">
@@ -126,8 +168,8 @@ $user = getCurrentUser();
 
         <!-- PROGRAMAS SECTION -->
         <div id="programas" class="section hidden">
-            <div class="d-flex flex-between items-center mb-4">
-                <h2>Programas Académicos</h2>
+            <div class="page-header">
+                <h1>Programas Académicos</h1>
                 <button class="btn btn-primary" onclick="showModal('modal-programa')">➕ Nuevo Programa</button>
             </div>
 
@@ -136,18 +178,113 @@ $user = getCurrentUser();
                     <table class="table" id="table-programas">
                         <thead>
                             <tr>
-                                <th>Código</th>
-                                <th>Nombre</th>
-                                <th>Nivel</th>
-                                <th>Duración</th>
-                                <th>Estado</th>
-                                <th>Acciones</th>
+                                <th>📌 Código</th>
+                                <th>📚 Nombre</th>
+                                <th>📊 Nivel</th>
+                                <th>⏱️ Duración</th>
+                                <th>✓ Estado</th>
+                                <th>⚙️ Acciones</th>
                             </tr>
                         </thead>
                         <tbody id="programas-tbody">
                             <tr><td colspan="6" class="text-center text-muted">Cargando...</td></tr>
                         </tbody>
                     </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- MATERIAS SECTION -->
+        <div id="materias" class="section hidden">
+            <div class="page-header">
+                <h1>Gestión de Materias</h1>
+                <button class="btn btn-primary" onclick="showModal('modal-materia')">➕ Nueva Materia</button>
+            </div>
+
+            <div class="card">
+                <div class="card-body">
+                    <table class="table" id="table-materias">
+                        <thead>
+                            <tr>
+                                <th>📖 Código</th>
+                                <th>📚 Nombre</th>
+                                <th>🎓 Programa</th>
+                                <th>⭐ Créditos</th>
+                                <th>⚙️ Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="materias-tbody">
+                            <tr><td colspan="5" class="text-center text-muted">Cargando...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- GRUPOS SECTION -->
+        <div id="grupos" class="section hidden">
+            <div class="page-header">
+                <h1>Gestión de Grupos</h1>
+                <button class="btn btn-primary" onclick="showModal('modal-grupo')">➕ Nuevo Grupo</button>
+            </div>
+
+            <div class="card">
+                <div class="card-body">
+                    <table class="table" id="table-grupos">
+                        <thead>
+                            <tr>
+                                <th>👥 Código</th>
+                                <th>📚 Nombre</th>
+                                <th>📖 Programa</th>
+                                <th>👨 Estudiantes</th>
+                                <th>✓ Estado</th>
+                                <th>⚙️ Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="grupos-tbody">
+                            <tr><td colspan="6" class="text-center text-muted">Cargando...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="../assets/js/utils.js"></script>
+    <script>
+        function loadSection(sectionId) {
+            // Ocultar todas las secciones
+            document.querySelectorAll('.section').forEach(s => s.classList.add('hidden'));
+            document.querySelectorAll('.nav-link').forEach(n => n.classList.remove('active'));
+            
+            // Mostrar sección seleccionada
+            document.getElementById(sectionId).classList.remove('hidden');
+            event.target.classList.add('active');
+        }
+
+        function logout() {
+            if (confirm('¿Seguro que deseas cerrar sesión?')) {
+                window.location.href = '../assets/js/logout.php';
+            }
+        }
+
+        // Inicializar
+        document.addEventListener('DOMContentLoaded', () => {
+            const now = new Date();
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('current-date').textContent = now.toLocaleDateString('es-ES', options);
+            
+            // Cargar estadísticas (simulado)
+            setTimeout(() => {
+                document.getElementById('stat-docentes').textContent = '8';
+                document.getElementById('stat-programas').textContent = '5';
+                document.getElementById('stat-materias').textContent = '32';
+                document.getElementById('stat-grupos').textContent = '12';
+            }, 500);
+        });
+    </script>
+</body>
+</html>
                 </div>
             </div>
         </div>
@@ -537,5 +674,17 @@ $user = getCurrentUser();
             }
         }
     </script>
+    <script src="../assets/js/app.js"></script>
+    <script src="../assets/js/utils.js"></script>
+    <script src="../assets/js/helpers.js"></script>
+    <script src="../assets/js/dashboard-api.js"></script>
+    <script src="../assets/js/modules/reportes.js"></script>
+    <script src="../assets/js/modules/busqueda.js"></script>
+    <script src="../assets/js/modules/notificaciones.js"></script>
+    <script src="../assets/js/modules/estadisticas.js"></script>
+    <script src="../assets/js/modules/cache.js"></script>
+    <script src="../assets/js/modules/horarios-avanzados.js"></script>
+    <script src="../assets/js/modules/usuarios-avanzados.js"></script>
+    <script src="../assets/js/modules/reportes-avanzados.js"></script>
 </body>
 </html>

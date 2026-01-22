@@ -43,6 +43,11 @@ define('VIEWS_PATH', SRC_PATH . '/views');
 define('INCLUDES_PATH', SRC_PATH . '/includes');
 
 // =====================================================
+// CARGAR MODELOS
+// =====================================================
+require_once INCLUDES_PATH . '/Models.php';
+
+// =====================================================
 // CONFIGURACIÓN DE LOGS
 // =====================================================
 define('LOG_ENABLED', true);
@@ -99,10 +104,19 @@ function getDatabase() {
 
 function jsonResponse($success, $message = '', $data = null, $statusCode = 200) {
     header('Content-Type: application/json; charset=utf-8');
+    
+    // Si se pasa un array como primer argumento (formato antiguo)
+    if (is_array($success)) {
+        http_response_code(is_array($message) && isset($message[0]) ? $message[0] : $statusCode);
+        echo json_encode($success, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+        exit;
+    }
+    
+    // Formato correcto: (bool, string, array, int)
     http_response_code($statusCode);
     
     $response = [
-        'success' => $success,
+        'success' => (bool)$success,
         'message' => $message,
         'data' => $data,
         'timestamp' => date('Y-m-d H:i:s')

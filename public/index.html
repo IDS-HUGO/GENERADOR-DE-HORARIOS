@@ -5,119 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ClassControl - Sistema de Gestión de Horarios</title>
     <link rel="stylesheet" href="assets/css/style.css">
-    <style>
-        body {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            overflow: hidden;
-        }
-
-        .login-container {
-            max-width: 1200px;
-            width: 100%;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 40px;
-            padding: 20px;
-        }
-
-        .info-panel {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            color: var(--text-light);
-        }
-
-        .info-panel h1 {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-            background: linear-gradient(135deg, var(--primary), var(--accent-salmon));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .info-panel p {
-            font-size: 1.2rem;
-            margin-bottom: 2rem;
-            color: var(--text-light);
-        }
-
-        .features {
-            display: grid;
-            gap: 15px;
-        }
-
-        .feature {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            padding: 15px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 8px;
-            transition: var(--transition);
-        }
-
-        .feature:hover {
-            background: rgba(255, 255, 255, 0.1);
-            transform: translateX(10px);
-        }
-
-        .feature-icon {
-            font-size: 2rem;
-        }
-
-        .login-panel {
-            background: var(--bg-card);
-            border-radius: 12px;
-            padding: 40px;
-            box-shadow: var(--shadow-lg);
-        }
-
-        .login-header {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
-        .login-header h2 {
-            color: var(--text-primary);
-            margin-bottom: 10px;
-        }
-
-        .login-header p {
-            color: var(--text-secondary);
-        }
-
-        .credentials-info {
-            background: linear-gradient(135deg, var(--primary), var(--accent-salmon));
-            color: var(--bg-dark);
-            padding: 15px;
-            border-radius: 8px;
-            margin-top: 20px;
-            text-align: center;
-        }
-
-        .credentials-info strong {
-            display: block;
-            margin-bottom: 5px;
-        }
-
-        @media (max-width: 768px) {
-            .login-container {
-                grid-template-columns: 1fr;
-            }
-
-            .info-panel {
-                display: none;
-            }
-
-            .info-panel h1 {
-                font-size: 2rem;
-            }
-        }
-    </style>
 </head>
 <body>
     <div class="login-container">
@@ -128,28 +15,28 @@
             
             <div class="features">
                 <div class="feature">
-                    <div class="feature-icon"></div>
+                    <div class="feature-icon">⚙️</div>
                     <div>
                         <strong>Gestión Inteligente</strong>
                         <p class="text-muted">Administra docentes, programas, materias y grupos</p>
                     </div>
                 </div>
                 <div class="feature">
-                    <div class="feature-icon"></div>
+                    <div class="feature-icon">📅</div>
                     <div>
                         <strong>Horarios Automatizados</strong>
                         <p class="text-muted">Genera horarios optimizados sin conflictos</p>
                     </div>
                 </div>
                 <div class="feature">
-                    <div class="feature-icon"></div>
+                    <div class="feature-icon">🔐</div>
                     <div>
                         <strong>Roles y Permisos</strong>
                         <p class="text-muted">Acceso diferenciado para administradores y docentes</p>
                     </div>
                 </div>
                 <div class="feature">
-                    <div class="feature-icon"></div>
+                    <div class="feature-icon">📊</div>
                     <div>
                         <strong>Seguridad y Auditoría</strong>
                         <p class="text-muted">Registros de actividad y control de acceso</p>
@@ -172,7 +59,7 @@
                         type="email" 
                         id="email" 
                         name="email" 
-                        placeholder="usuario@ejemplo.com" 
+                        placeholder="admin@classcontrol.com" 
                         required
                         autocomplete="username"
                     >
@@ -184,7 +71,7 @@
                         type="password" 
                         id="password" 
                         name="password" 
-                        placeholder="••••••••" 
+                        placeholder="GenerateSecure123!" 
                         required
                         autocomplete="current-password"
                     >
@@ -195,31 +82,33 @@
                     <label for="remember">Recordar sesión</label>
                 </div>
 
-                <button type="submit" class="btn btn-primary btn-block mt-3">
+                <button type="submit" class="btn btn-primary btn-block mt-3" id="btn-login">
                     Iniciar Sesión
                 </button>
 
-                <div class="text-center mt-3">
-                    <p class="text-muted">¿Nuevo usuario? <a href="#" onclick="showModal('modal-registro')">Solicitar acceso</a></p>
-                </div>
+                <hr style="border: none; border-top: 1px solid var(--border-color); margin: 20px 0;">
+
+                <p class="text-center text-muted mb-3">¿Nuevo usuario? <a href="#" onclick="showModal('modal-registro')" style="color: var(--primary-light); text-decoration: none; font-weight: 600;">Solicitar acceso</a></p>
             </form>
             <div class="credentials-info">
-                <strong>Cuenta de demostración</strong>
-                <p style="margin: 0;">Solicite credenciales de prueba al administrador del sistema.</p>
+                <strong>👤 Cuenta de Demostración</strong>
+                <p style="margin: 8px 0 0 0; font-size: 0.9rem;">Solicite credenciales de prueba al administrador del sistema.</p>
             </div>
         </div>
     </div>
 
     <!-- FOOTER PROFESIONAL -->
     <footer class="site-footer container mt-4">
-        <div class="card" style="padding:18px; display:flex; justify-content:space-between; align-items:center; gap:16px;">
-            <div>
-                <strong>ClassControl</strong>
-                <div class="text-muted">Sistema de gestión de horarios académicos — Versión 1.0</div>
-            </div>
-            <div class="text-muted" style="font-size:.95rem; text-align:right;">
-                <div>Contacto: soporte@classcontrol.com</div>
-                <div>© <span id="current-year"></span> ClassControl. Todos los derechos reservados.</div>
+        <div class="card" style="padding: 20px;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: center;">
+                <div>
+                    <strong style="font-size: 1.1rem; display: block; margin-bottom: 5px;">🎓 ClassControl</strong>
+                    <div class="text-muted">Sistema profesional de gestión de horarios académicos</div>
+                </div>
+                <div class="text-muted" style="font-size: 0.95rem; text-align: right;">
+                    <div><strong>Contacto:</strong> soporte@classcontrol.com</div>
+                    <div>© <span id="current-year"></span> ClassControl. Todos los derechos reservados.</div>
+                </div>
             </div>
         </div>
     </footer>
@@ -284,81 +173,18 @@
         </div>
     </div>
 
+    <script src="assets/js/app.js"></script>
     <script src="assets/js/utils.js"></script>
+    <script src="assets/js/modules/api.js"></script>
+    <script src="assets/js/modules/ui.js"></script>
+    <script src="assets/js/modules/forms.js"></script>
+    <script src="assets/js/modules/auth.js"></script>
     <script>
-        async function handleLogin(e) {
-            e.preventDefault();
-            
-            const formData = getFormData(e.target);
-            
-            try {
-                const response = await api('/src/api/auth/login.php', {
-                    method: 'POST',
-                    body: formData
-                });
-
-                if (response.success) {
-                    showAlert('¡Bienvenido!', 'success');
-                    
-                    setTimeout(() => {
-                        if (response.redirect) {
-                            window.location.href = response.redirect;
-                        }
-                    }, 1000);
-                } else {
-                    showAlert(response.message || 'Credenciales incorrectas', 'danger');
-                }
-            } catch (error) {
-                showAlert('Error al iniciar sesión', 'danger');
-                console.error(error);
-            }
-        }
-
-        async function handleRegistro(e) {
-            e.preventDefault();
-            
-            const formData = getFormData(e.target);
-            
-            // Validar contraseñas
-            if (formData.password !== formData.password_confirm) {
-                showAlert('Las contraseñas no coinciden', 'warning');
-                return;
-            }
-
-            // Validar email
-            if (!validateEmail(formData.email)) {
-                showAlert('Email inválido', 'warning');
-                return;
-            }
-
-            // Validar password
-            if (!validatePassword(formData.password)) {
-                showAlert('La contraseña debe tener al menos 8 caracteres', 'warning');
-                return;
-            }
-
-            try {
-                const response = await api('/src/api/auth/register.php', {
-                    method: 'POST',
-                    body: formData
-                });
-
-                if (response.success) {
-                    showAlert('Registro exitoso. Tu cuenta será activada pronto', 'success');
-                    closeModal('modal-registro');
-                    e.target.reset();
-                } else {
-                    showAlert(response.message || 'Error en el registro', 'danger');
-                }
-            } catch (error) {
-                showAlert('Error al registrarse', 'danger');
-                console.error(error);
-            }
-        }
-
-        // Auto-focus en el campo de email
         document.addEventListener('DOMContentLoaded', () => {
-            document.getElementById('email').focus();
+            loadSavedCredentials();
+            document.getElementById('email')?.focus();
+            document.getElementById('current-year').textContent = new Date().getFullYear();
+            console.log('[INIT] Login Page Ready');
         });
     </script>
 </body>
