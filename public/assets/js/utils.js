@@ -91,7 +91,7 @@ function getAlertIcon(type) {
 function showModal(modalId) { 
     const modal = document.getElementById(modalId); 
     if (modal) { 
-        modal.classList.add('active'); 
+        modal.classList.remove('hidden'); 
         document.body.style.overflow = 'hidden'; 
     } 
 }
@@ -99,7 +99,7 @@ function showModal(modalId) {
 function closeModal(modalId) { 
     const modal = document.getElementById(modalId); 
     if (modal) { 
-        modal.classList.remove('active'); 
+        modal.classList.add('hidden'); 
         document.body.style.overflow = ''; 
         const form = modal.querySelector('form'); 
         if (form) form.reset(); 

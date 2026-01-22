@@ -16,7 +16,7 @@ try {
     switch ($action) {
         case 'list':
             // Listar registros de auditoría (solo admin)
-            if ($user['tipo'] !== 'admin') {
+            if ($user['tipo_usuario'] !== 'administrador') {
                 jsonResponse(false, 'No autorizado', null, 403);
             }
 
@@ -48,7 +48,7 @@ try {
 
         case 'resumen':
             // Resumen de auditoría
-            if ($user['tipo'] !== 'admin') {
+            if ($user['tipo_usuario'] !== 'administrador') {
                 jsonResponse(false, 'No autorizado', null, 403);
             }
 

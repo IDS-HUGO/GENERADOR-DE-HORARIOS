@@ -30,7 +30,7 @@ try {
             break;
 
         case 'create':
-            if ($user['tipo'] !== 'admin') {
+            if ($user['tipo_usuario'] !== 'administrador') {
                 jsonResponse(false, 'Solo administradores pueden crear programas', null, 403);
             }
             
@@ -60,7 +60,7 @@ try {
             break;
 
         case 'update':
-            if ($user['tipo'] !== 'admin') {
+            if ($user['tipo_usuario'] !== 'administrador') {
                 jsonResponse(false, 'Solo administradores pueden editar programas', null, 403);
             }
             
@@ -88,7 +88,7 @@ try {
             break;
 
         case 'delete':
-            if ($user['tipo'] !== 'admin') {
+            if ($user['tipo_usuario'] !== 'administrador') {
                 jsonResponse(false, 'Solo administradores pueden eliminar programas', null, 403);
             }
             

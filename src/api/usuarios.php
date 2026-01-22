@@ -21,7 +21,7 @@ try {
 
         case 'list':
             // Listar usuarios (solo admin)
-            if ($user['tipo'] !== 'admin') {
+            if ($user['tipo_usuario'] !== 'administrador') {
                 jsonResponse(false, 'No autorizado', null, 403);
             }
 
@@ -44,7 +44,7 @@ try {
 
         case 'create':
             // Crear usuario (solo admin)
-            if ($user['tipo'] !== 'admin') {
+            if ($user['tipo_usuario'] !== 'administrador') {
                 jsonResponse(false, 'No autorizado', null, 403);
             }
 
@@ -79,7 +79,7 @@ try {
             if (!$id) jsonResponse(false, 'ID requerido', null, 400);
 
             // Validar permisos
-            if ($user['tipo'] !== 'admin' && $user['id'] != $id) {
+            if ($user['tipo_usuario'] !== 'administrador' && $user['usuario_id'] != $id) {
                 jsonResponse(false, 'No puedes editar otro usuario', null, 403);
             }
 
@@ -97,7 +97,7 @@ try {
 
         case 'delete':
             // Desactivar usuario (soft delete)
-            if ($user['tipo'] !== 'admin') {
+            if ($user['tipo_usuario'] !== 'administrador') {
                 jsonResponse(false, 'No autorizado', null, 403);
             }
 
@@ -110,7 +110,7 @@ try {
 
         case 'reset_password':
             // Resetear contraseña
-            if ($user['tipo'] !== 'admin') {
+            if ($user['tipo_usuario'] !== 'administrador') {
                 jsonResponse(false, 'No autorizado', null, 403);
             }
 

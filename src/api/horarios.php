@@ -36,7 +36,7 @@ try {
 
         case 'create':
             // Crear horario
-            if ($user['tipo'] !== 'admin' && $user['tipo'] !== 'coordinador') {
+            if ($user['tipo_usuario'] !== 'administrador' && $user['tipo_usuario'] !== 'coordinador') {
                 jsonResponse(false, 'No autorizado', null, 403);
             }
 
@@ -65,7 +65,7 @@ try {
 
         case 'update':
             // Actualizar horario
-            if ($user['tipo'] !== 'admin' && $user['tipo'] !== 'coordinador') {
+            if ($user['tipo_usuario'] !== 'administrador' && $user['tipo_usuario'] !== 'coordinador') {
                 jsonResponse(false, 'No autorizado', null, 403);
             }
 
@@ -90,7 +90,7 @@ try {
 
         case 'delete':
             // Eliminar horario
-            if ($user['tipo'] !== 'admin') {
+            if ($user['tipo_usuario'] !== 'administrador') {
                 jsonResponse(false, 'No autorizado', null, 403);
             }
 
