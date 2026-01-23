@@ -36,22 +36,27 @@ if ($docenteId === 0) {
             margin-bottom: 20px;
         }
         
+        .calendar-header h1 {
+            color: #1a237e;
+            margin: 0;
+        }
+        
         .week-calendar {
             background: white;
             border-radius: 12px;
             overflow: hidden;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            box-shadow: 0 8px 32px rgba(26, 35, 126, 0.15);
         }
         
         .calendar-grid {
             display: grid;
             grid-template-columns: 80px repeat(6, 1fr);
             gap: 1px;
-            background: #e0e0e0;
+            background: #e8eaf6;
         }
         
         .calendar-header-cell {
-            background: #2196F3;
+            background: linear-gradient(135deg, #1a237e 0%, #283593 100%);
             color: white;
             padding: 15px 10px;
             text-align: center;
@@ -60,12 +65,13 @@ if ($docenteId === 0) {
         }
         
         .time-cell {
-            background: #f5f5f5;
+            background: #f3f3f3;
             padding: 10px;
             text-align: center;
             font-size: 0.85rem;
-            color: #666;
+            color: #333;
             font-weight: 500;
+            border-right: 2px solid #e8eaf6;
         }
         
         .calendar-cell {
@@ -102,6 +108,7 @@ if ($docenteId === 0) {
             transition: all 0.3s;
             box-shadow: 0 2px 8px rgba(0,0,0,0.2);
             position: relative;
+            font-weight: 500;
         }
         
         .class-block::before {
@@ -115,20 +122,23 @@ if ($docenteId === 0) {
         }
         
         .class-block:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.3);
         }
         
         .class-block:hover::before {
             opacity: 1;
         }
         
-        /* Colores diferentes por índice de materia */
-        .class-block:nth-child(1) { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
-        .class-block:nth-child(2) { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
-        .class-block:nth-child(3) { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
-        .class-block:nth-child(4) { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
-        .class-block:nth-child(5) { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
+        /* Colores para cada clase por índice de asignación */
+        .class-color-0 { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .class-color-1 { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+        .class-color-2 { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+        .class-color-3 { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
+        .class-color-4 { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
+        .class-color-5 { background: linear-gradient(135deg, #30cfd0 0%, #330867 100%); }
+        .class-color-6 { background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); }
+        .class-color-7 { background: linear-gradient(135deg, #ff9a56 0%, #ff6a88 100%); }
         
         .class-block-title {
             font-weight: 600;
@@ -141,11 +151,25 @@ if ($docenteId === 0) {
         }
         
         .quick-add-panel {
-            background: white;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
             padding: 20px;
             border-radius: 12px;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
             margin-bottom: 20px;
+            border-left: 5px solid #1a237e;
+        }
+        
+        .quick-add-panel h3 {
+            color: #1a237e;
+            margin-bottom: 10px;
+        }
+        
+        .quick-add-panel > p {
+            color: #1a237e !important;
+            background: rgba(255,255,255,0.6);
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 15px;
         }
         
         .quick-form {
@@ -170,13 +194,22 @@ if ($docenteId === 0) {
         .form-group-inline select,
         .form-group-inline input {
             padding: 10px;
-            border: 1px solid #ddd;
+            border: 2px solid #1a237e;
             border-radius: 6px;
             font-size: 0.9rem;
+            transition: all 0.3s;
+            background: white;
+        }
+        
+        .form-group-inline select:focus,
+        .form-group-inline input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
         
         .btn-add-quick {
-            background: #4CAF50;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             padding: 10px 20px;
             border: none;
@@ -184,12 +217,16 @@ if ($docenteId === 0) {
             cursor: pointer;
             font-weight: 600;
             transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
         }
         
         .btn-add-quick:hover {
-            background: #45a049;
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(76,175,80,0.3);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-add-quick:active {
+            transform: translateY(0);
         }
         
         .legend {
@@ -197,8 +234,9 @@ if ($docenteId === 0) {
             gap: 20px;
             margin-top: 20px;
             padding: 15px;
-            background: #f5f5f5;
+            background: linear-gradient(135deg, #1a237e 0%, #283593 100%);
             border-radius: 8px;
+            flex-wrap: wrap;
         }
         
         .legend-item {
@@ -206,12 +244,15 @@ if ($docenteId === 0) {
             align-items: center;
             gap: 8px;
             font-size: 0.9rem;
+            color: white;
+            font-weight: 500;
         }
         
         .legend-color {
-            width: 20px;
-            height: 20px;
+            width: 24px;
+            height: 24px;
             border-radius: 4px;
+            border: 2px solid white;
         }
         
         @media (max-width: 1200px) {
@@ -299,14 +340,22 @@ if ($docenteId === 0) {
         <div class="legend">
             <div class="legend-item">
                 <div class="legend-color" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);"></div>
-                <span>Clase Asignada (Click para eliminar)</span>
+                <span>Clase 1</span>
             </div>
             <div class="legend-item">
-                <div class="legend-color" style="background: #f0f7ff; border: 2px dashed #2196F3;"></div>
-                <span>Click en celda vacía para agregar</span>
+                <div class="legend-color" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);"></div>
+                <span>Clase 2</span>
             </div>
             <div class="legend-item">
-                <span>🗑️ = Eliminar horario</span>
+                <div class="legend-color" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);"></div>
+                <span>Clase 3</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);"></div>
+                <span>Clase 4+</span>
+            </div>
+            <div class="legend-item" style="margin-left: auto;">
+                <span>🗑️ = Eliminar | Click = Detalles</span>
             </div>
         </div>
     </div>
@@ -341,9 +390,15 @@ if ($docenteId === 0) {
             }
         }
 
-        function logout() {
-            if (confirm('¿Cerrar sesión?')) {
-                window.location.href = `${API_BASE}/auth/logout.php`;
+        async function logout() {
+            if (confirm('¿Desea cerrar sesión?')) {
+                try {
+                    const res = await fetch(`${API_BASE}/auth/logout.php`, { method: 'POST' });
+                    const data = await res.json();
+                    window.location.href = data.redirect || '/ClassControl/public/index.html';
+                } catch(e) {
+                    window.location.href = '/ClassControl/public/index.html';
+                }
             }
         }
 
@@ -395,6 +450,20 @@ if ($docenteId === 0) {
             const grid = document.getElementById('calendar-grid');
             let html = '<div class="calendar-header-cell">Hora</div>';
             
+            // Crear mapa de colores por materia
+            const coloresPorMateria = {};
+            let colorIndex = 0;
+            
+            // Asignar colores a cada materia única
+            asignacionesData.forEach(item => {
+                if (item.materia_nombre && !coloresPorMateria[item.materia_nombre]) {
+                    coloresPorMateria[item.materia_nombre] = colorIndex % 8;
+                    colorIndex++;
+                }
+            });
+            
+            console.log('[CALENDARIO] Colores asignados:', coloresPorMateria);
+            
             // Headers de días
             dias.forEach(dia => {
                 html += `<div class="calendar-header-cell">${dia.charAt(0).toUpperCase() + dia.slice(1)}</div>`;
@@ -409,18 +478,20 @@ if ($docenteId === 0) {
                 dias.forEach(dia => {
                     const clases = horariosData.filter(h => 
                         h.dia_semana === dia && 
-                        h.hora_inicio >= hora && 
-                        h.hora_inicio < horaFin
+                        h.hora_inicio && h.hora_fin &&
+                        h.hora_inicio.substring(0, 5) >= hora && 
+                        h.hora_inicio.substring(0, 5) < horaFin
                     );
                     
                     let cellContent = '';
                     if (clases.length > 0) {
                         clases.forEach(clase => {
+                            const colorClass = `class-color-${coloresPorMateria[clase.materia_nombre] || 0}`;
                             cellContent += `
-                                <div class="class-block" onclick="editarHorario(${clase.horario_id})">
+                                <div class="class-block ${colorClass}" onclick="editarHorario(${clase.horario_id})">
                                     <div class="class-block-title">${clase.materia_nombre || 'Sin nombre'}</div>
                                     <div class="class-block-group">Grupo ${clase.grupo_codigo || '-'}</div>
-                                    <div class="class-block-group">${clase.hora_inicio}-${clase.hora_fin}</div>
+                                    <div class="class-block-group">${clase.hora_inicio.substring(0,5)}-${clase.hora_fin.substring(0,5)}</div>
                                 </div>
                             `;
                         });

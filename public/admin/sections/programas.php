@@ -1,7 +1,9 @@
 <section id="programas" class="page-section">
     <div class="page-header">
         <h1>Programas académicos</h1>
+        <?php if ($tipo !== 'director'): ?>
         <button class="btn btn-primary" onclick="showProgramaModal()">+ Nuevo programa</button>
+        <?php endif; ?>
     </div>
     <div class="card">
         <div class="card-body">

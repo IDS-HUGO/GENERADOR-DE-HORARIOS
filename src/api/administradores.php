@@ -105,10 +105,29 @@ try {
             $id = $usuario_model->create($data);
             
             if ($id) {
+                // Enviar credenciales por email
+                require_once '../includes/EmailService.php';
+                $emailService = new EmailService();
+                $tempPassword = $input['password'];
+                $emailResult = $emailService->enviarCredencialesAdministrador(
+                    $input['email'],
+                    $input['nombre'],
+                    $input['apellido'],
+                    $tempPassword
+                );
+                
+                $mensaje = 'Administrador creado exitosamente';
+                if ($emailResult['success']) {
+                    $mensaje .= '. Credenciales enviadas al correo.';
+                } else {
+                    $mensaje .= '. ADVERTENCIA: ' . $emailResult['message'];
+                }
+                
                 echo json_encode([
                     'success' => true, 
-                    'message' => 'Administrador creado exitosamente',
-                    'id' => $id
+                    'message' => $mensaje,
+                    'id' => $id,
+                    'email_sent' => $emailResult['success']
                 ]);
             } else {
                 throw new Exception('Error al crear administrador');

@@ -1,4 +1,4 @@
-Enviar credenciales al administrador
+NO HAY Enviar credenciales al administrador
 Eliminar boton de crear programa academico en director
 Eliminar boton de crear materias en director
 Eliminar boton de crear grupos en director

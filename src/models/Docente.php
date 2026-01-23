@@ -93,7 +93,7 @@ class Docente extends Model {
                     CASE WHEN a.asignacion_id IS NOT NULL THEN 1 ELSE 0 END as ya_asignada,
                     CASE WHEN a.docente_id = ? THEN 1 ELSE 0 END as asignada_a_mi
                   FROM materias m
-                  INNER JOIN grupos g ON m.semestre = g.semestre
+                  INNER JOIN grupos g ON m.programa_id = g.programa_id AND m.semestre = g.semestre
                   LEFT JOIN asignaciones a ON m.materia_id = a.materia_id AND g.grupo_id = a.grupo_id
                   WHERE g.grupo_id = ? AND m.estado = 'activa'
                   ORDER BY m.codigo";

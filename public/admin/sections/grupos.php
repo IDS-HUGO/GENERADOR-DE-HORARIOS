@@ -1,7 +1,9 @@
 <section id="grupos" class="page-section">
     <div class="page-header">
         <h1>Grupos</h1>
+        <?php if ($tipo !== 'director'): ?>
         <button class="btn btn-primary" onclick="showGrupoModal()">+ Nuevo grupo</button>
+        <?php endif; ?>
     </div>
     <div class="card">
         <div class="card-body">

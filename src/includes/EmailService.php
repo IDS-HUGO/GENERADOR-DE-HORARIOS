@@ -14,6 +14,40 @@ class EmailService {
     }
     
     /**
+     * Enviar credenciales a un administrador nuevo
+     */
+    public function enviarCredencialesAdministrador($email, $nombre, $apellido, $tempPassword) {
+        try {
+            if (empty($this->gmailEmail) || empty($this->gmailPassword)) {
+                logWarning('EMAIL_NOT_CONFIGURED', 'Gmail no está configurado');
+                return ['success' => false, 'message' => 'Email no configurado en el servidor'];
+            }
+            
+            $asunto = 'ClassControl - Credenciales de Administrador';
+            $htmlBody = $this->generarHTMLCredencialesAdmin($nombre, $apellido, $email, $tempPassword);
+            
+            $headers = "MIME-Version: 1.0\r\n";
+            $headers .= "Content-type: text/html; charset=UTF-8\r\n";
+            $headers .= "From: " . $this->gmailEmail . "\r\n";
+            $headers .= "Reply-To: " . $this->gmailEmail . "\r\n";
+            $headers .= "X-Mailer: ClassControl/1.0\r\n";
+            
+            $enviado = @mail($email, $asunto, $htmlBody, $headers);
+            
+            if ($enviado) {
+                logInfo('EMAIL_ADMIN_SENT', ['email' => $email, 'nombre' => $nombre]);
+                return ['success' => true, 'message' => 'Email enviado correctamente'];
+            } else {
+                logError('EMAIL_ADMIN_FAILED', "No se pudo enviar a $email");
+                return ['success' => false, 'message' => 'El email no pudo enviarse'];
+            }
+        } catch (\Exception $e) {
+            logError('EMAIL_EXCEPTION', $e->getMessage());
+            return ['success' => false, 'message' => 'Error: ' . $e->getMessage()];
+        }
+    }
+    
+    /**
      * Enviar credenciales a un docente nuevo
      */
     public function enviarCredencialesDocente($email, $nombre, $apellido, $tempPassword) {

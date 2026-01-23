@@ -412,9 +412,15 @@ $user = getCurrentUser();
             }
         }
         
-        function logout() {
-            if (confirm('¿Cerrar sesión?')) {
-                window.location.href = `${API_BASE_URL}/src/api/auth/logout.php`;
+        async function logout() {
+            if (confirm('¿Desea cerrar sesión?')) {
+                try {
+                    const res = await fetch(`${API_BASE_URL}/src/api/auth/logout.php`, { method: 'POST' });
+                    const data = await res.json();
+                    window.location.href = data.redirect || '/ClassControl/public/index.html';
+                } catch(e) {
+                    window.location.href = '/ClassControl/public/index.html';
+                }
             }
         }
         

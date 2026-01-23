@@ -1,0 +1,20 @@
+<style>
+    /* Estilos adicionales para el horario semanal */
+    
+    .btn-secondary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+    
+    .btn-secondary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    }
+    
+    .calendar-container {
+        max-width: 1400px;
+        margin: 20px auto;
+        padding: 20px;
+    }
+</style>

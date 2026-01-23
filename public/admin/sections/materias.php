@@ -1,7 +1,9 @@
 <section id="materias" class="page-section">
     <div class="page-header">
         <h1>Materias</h1>
+        <?php if ($tipo !== 'director'): ?>
         <button class="btn btn-primary" onclick="showMateriaModal()">+ Nueva materia</button>
+        <?php endif; ?>
     </div>
     <div class="card">
         <div class="card-body">
