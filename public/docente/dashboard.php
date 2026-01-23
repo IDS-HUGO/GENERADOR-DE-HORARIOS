@@ -25,9 +25,9 @@ $docenteId = $docente['docente_id'] ?? 0;
             <ul class="navbar-menu">
                 <li><a href="#" class="nav-link active" data-target="inicio">Inicio</a></li>
                 <li><a href="seleccion-materias.php" class="nav-link">📚 Seleccionar Materias</a></li>
-                <li><a href="#" class="nav-link" data-target="horario">Mi Horario</a></li>
+                <li><a href="mi-horario-semanal.php" class="nav-link">📅 Mi Horario Semanal</a></li>
+                <li><a href="#" class="nav-link" data-target="horario">Mi Horario (Tabla)</a></li>
                 <li><a href="#" class="nav-link" data-target="disponibilidad">Disponibilidad</a></li>
-                <li><a href="#" class="nav-link" data-target="materias">Materias</a></li>
             </ul>
             <div class="navbar-user">
                 <div class="user-info">
@@ -69,7 +69,10 @@ $docenteId = $docente['docente_id'] ?? 0;
         </section>
 
         <section id="horario" class="section hidden">
-            <div class="page-header"><h1>Mi horario</h1></div>
+            <div class="page-header">
+                <h1>Mi horario</h1>
+                <button class="btn btn-primary" onclick="openModal('modal-crear-horario')">+ Crear Horario</button>
+            </div>
             <div class="card">
                 <div class="card-body">
                     <table class="table">
@@ -180,16 +183,63 @@ $docenteId = $docente['docente_id'] ?? 0;
         </div>
     </div>
 
+    <div id="modal-crear-horario" class="modal-overlay hidden">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 class="modal-title">Crear Horario</h2>
+                <button class="modal-close" data-close="modal-crear-horario">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="form-crear-horario">
+                    <div class="form-group">
+                        <label>Asignación (Materia - Grupo)</label>
+                        <select name="asignacion_id" id="select-asignacion" required>
+                            <option value="">Seleccione una asignación</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Día de la semana</label>
+                        <select name="dia_semana" required>
+                            <option value="">Seleccione un día</option>
+                            <option value="lunes">Lunes</option>
+                            <option value="martes">Martes</option>
+                            <option value="miercoles">Miércoles</option>
+                            <option value="jueves">Jueves</option>
+                            <option value="viernes">Viernes</option>
+                            <option value="sabado">Sábado</option>
+                        </select>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Hora inicio</label>
+                            <input type="time" name="hora_inicio" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Hora fin</label>
+                            <input type="time" name="hora_fin" required>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-close="modal-crear-horario">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Crear Horario</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <script>
         const DOCENTE_ID = <?php echo (int)$docenteId; ?>;
-        const API_BASE = '<?php echo rtrim(baseUrl("src/api"), '/'); ?>';
+        const API_BASE = '/ClassControl/src/api';
         let horariosCache = [];
 
-        const navLinks = document.querySelectorAll('.nav-link');
+        const navLinks = document.querySelectorAll('.nav-link[data-target]');
         navLinks.forEach(link => link.addEventListener('click', (e) => {
             e.preventDefault();
             const target = link.dataset.target;
-            loadSection(target);
+            if (target) {
+                loadSection(target);
+            }
         }));
 
         document.getElementById('btn-logout').addEventListener('click', handleLogout);
@@ -199,21 +249,46 @@ $docenteId = $docente['docente_id'] ?? 0;
         document.getElementById('form-perfil').addEventListener('submit', editarPerfil);
         document.getElementById('form-disponibilidad').addEventListener('submit', saveDisponibilidad);
         document.getElementById('btn-reset-dispo').addEventListener('click', resetDisponibilidad);
+        document.getElementById('form-crear-horario').addEventListener('submit', crearHorario);
 
         document.addEventListener('DOMContentLoaded', () => {
+            console.log('[DASHBOARD] Iniciando carga de datos...');
+            console.log('[DASHBOARD] DOCENTE_ID:', DOCENTE_ID);
+            console.log('[DASHBOARD] API_BASE:', API_BASE);
+            
+            if (DOCENTE_ID === 0) {
+                showAlert('⚠️ Error: No se encontró tu información de docente. Contacta al administrador.', 'danger', 5000);
+                return;
+            }
+            
             loadPerfil();
             loadDisponibilidad();
             loadHorario();
         });
 
         async function apiJson(path, options = {}) {
-            const url = path.startsWith('http') ? path : `${API_BASE}${path.startsWith('/') ? '' : '/'}${path}`;
-            const response = await fetch(url, {
-                credentials: 'include',
-                headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
-                ...options
-            });
-            return response.json();
+            try {
+                const url = path.startsWith('http') ? path : `${API_BASE}${path.startsWith('/') ? '' : '/'}${path}`;
+                console.log('[API] Llamando:', url);
+                
+                const response = await fetch(url, {
+                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
+                    ...options
+                });
+                
+                if (!response.ok) {
+                    console.error('[API] Error HTTP:', response.status);
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                
+                const data = await response.json();
+                console.log('[API] Respuesta:', data);
+                return data;
+            } catch (error) {
+                console.error('[API] Error:', error);
+                return { success: false, message: error.message };
+            }
         }
 
         function loadSection(id) {
@@ -239,7 +314,14 @@ $docenteId = $docente['docente_id'] ?? 0;
 
         function openModal(id) {
             const modal = document.getElementById(id);
-            if (modal) modal.classList.remove('hidden');
+            if (modal) {
+                modal.classList.remove('hidden');
+                
+                // Si es el modal de crear horario, cargar asignaciones
+                if (id === 'modal-crear-horario') {
+                    cargarAsignacionesParaHorario();
+                }
+            }
         }
 
         function closeModal(id) {
@@ -261,8 +343,12 @@ $docenteId = $docente['docente_id'] ?? 0;
         }
 
         async function loadPerfil() {
-            const res = await apiJson(`${API_BASE}/docentes.php?action=profile`);
+            console.log('[PERFIL] Cargando perfil...');
+            const res = await apiJson(`/docentes.php?action=profile`);
+            console.log('[PERFIL] Respuesta:', res);
+            
             if (!res.success || !res.data) {
+                console.error('[PERFIL] Error:', res.message);
                 showAlert(res.message || 'No se pudo cargar el perfil', 'danger');
                 return;
             }
@@ -306,8 +392,12 @@ $docenteId = $docente['docente_id'] ?? 0;
         }
 
         async function loadDisponibilidad() {
-            const res = await apiJson(`${API_BASE}/disponibilidad.php?action=list`);
+            console.log('[DISPONIBILIDAD] Cargando disponibilidad...');
+            const res = await apiJson(`/disponibilidad.php?action=list`);
+            console.log('[DISPONIBILIDAD] Respuesta:', res);
+            
             if (!res.success) {
+                console.error('[DISPONIBILIDAD] Error:', res.message);
                 showAlert(res.message || 'No se pudo cargar disponibilidad', 'danger');
                 return;
             }
@@ -359,15 +449,20 @@ $docenteId = $docente['docente_id'] ?? 0;
         }
 
         async function loadHorario() {
+            console.log('[HORARIO] Cargando horarios...');
             // Cargar asignaciones confirmadas con horarios
-            const res = await apiJson(`${API_BASE}/docentes.php?action=asignaciones_confirmadas`);
+            const res = await apiJson(`/docentes.php?action=asignaciones_confirmadas`);
+            console.log('[HORARIO] Respuesta:', res);
+            
             if (!res.success) {
+                console.error('[HORARIO] Error:', res.message);
                 showAlert(res.message || 'No se pudo cargar horarios', 'danger');
                 document.getElementById('horario-tbody').innerHTML = '<tr><td colspan="6" class="text-center text-muted">Error al cargar horarios</td></tr>';
                 return;
             }
             
             horariosCache = res.data || [];
+            console.log('[HORARIO] Datos cargados:', horariosCache.length, 'registros');
             renderHorario(horariosCache);
         }
 
@@ -464,6 +559,80 @@ $docenteId = $docente['docente_id'] ?? 0;
             document.getElementById('stat-materias').textContent = Object.keys(materiasMap).length;
             document.getElementById('stat-grupos').textContent = Object.keys(materiasMap).length;
             document.getElementById('stat-clases').textContent = horariosCache.filter(h => h.dia_semana).length || '0';
+        }
+
+        async function cargarAsignacionesParaHorario() {
+            const select = document.getElementById('select-asignacion');
+            select.innerHTML = '<option value="">Cargando...</option>';
+            
+            try {
+                // Cargar asignaciones desde el API
+                const res = await apiJson(`${API_BASE}/docentes.php?action=asignaciones_confirmadas`);
+                
+                if (!res.success) {
+                    select.innerHTML = '<option value="">Error al cargar asignaciones</option>';
+                    return;
+                }
+                
+                // Agrupar por asignacion_id para evitar duplicados
+                const asignacionesMap = {};
+                res.data.forEach(item => {
+                    const key = item.asignacion_id;
+                    if (!asignacionesMap[key]) {
+                        asignacionesMap[key] = {
+                            asignacion_id: item.asignacion_id,
+                            materia: item.materia_nombre,
+                            grupo: item.grupo_codigo,
+                            horarios: []
+                        };
+                    }
+                    if (item.dia_semana) {
+                        asignacionesMap[key].horarios.push(item);
+                    }
+                });
+                
+                // Crear opciones del selector
+                const options = ['<option value="">Seleccione una asignación</option>'];
+                Object.values(asignacionesMap).forEach(asig => {
+                    const horariosCount = asig.horarios.length;
+                    options.push(`<option value="${asig.asignacion_id}">${asig.materia} - ${asig.grupo} (${horariosCount} horarios)</option>`);
+                });
+                
+                select.innerHTML = options.join('');
+                
+                if (Object.keys(asignacionesMap).length === 0) {
+                    select.innerHTML = '<option value="">No tienes asignaciones disponibles</option>';
+                }
+                
+            } catch (error) {
+                console.error('Error cargando asignaciones:', error);
+                select.innerHTML = '<option value="">Error al cargar asignaciones</option>';
+            }
+        }
+
+        async function crearHorario(e) {
+            e.preventDefault();
+            const form = e.target;
+            const payload = {
+                asignacion_id: parseInt(form.asignacion_id.value),
+                dia_semana: form.dia_semana.value,
+                hora_inicio: form.hora_inicio.value,
+                hora_fin: form.hora_fin.value
+            };
+
+            const res = await apiJson(`${API_BASE}/docentes.php?action=crear_horario`, {
+                method: 'POST',
+                body: JSON.stringify(payload)
+            });
+
+            if (res.success) {
+                showAlert('Horario creado exitosamente', 'success');
+                closeModal('modal-crear-horario');
+                form.reset();
+                await loadHorario();
+            } else {
+                showAlert(res.message || 'No se pudo crear el horario', 'danger');
+            }
         }
     </script>
 </body>
