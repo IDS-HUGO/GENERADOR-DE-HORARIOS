@@ -4,6 +4,7 @@
  */
 
 require_once '../config.php';
+require_once INCLUDES_PATH . '/Models.php';
 
 if (!isAuthenticated()) {
     jsonResponse(false, 'No autorizado', null, 401);
@@ -57,7 +58,6 @@ try {
                 'semestre' => $data['semestre'],
                 'cantidad_estudiantes' => $data['cantidad_estudiantes'],
                 'jornada' => $data['jornada'] ?? 'matutina',
-                'descripcion' => $data['descripcion'] ?? null,
                 'estado' => 'activo'
             ]);
             

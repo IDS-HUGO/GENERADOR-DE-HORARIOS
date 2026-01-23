@@ -4,6 +4,7 @@
  */
 
 require_once '../config.php';
+require_once INCLUDES_PATH . '/Models.php';
 
 if (!isAuthenticated()) {
     jsonResponse(false, 'No autorizado', null, 401);
@@ -36,7 +37,7 @@ try {
             
             $data = json_decode(file_get_contents('php://input'), true);
             
-            $campos = ['codigo', 'nombre', 'nivel'];
+            $campos = ['codigo', 'nombre'];
             foreach ($campos as $campo) {
                 if (empty($data[$campo])) {
                     jsonResponse(false, "El campo $campo es requerido", null, 400);
@@ -50,7 +51,8 @@ try {
             $id = (new ProgramaAcademico())->create([
                 'codigo' => $data['codigo'],
                 'nombre' => $data['nombre'],
-                'nivel' => $data['nivel'],
+                'nivel' => $data['nivel'] ?? 'profesional',
+                'modalidad' => $data['modalidad'] ?? 'presencial',
                 'duracion_semestres' => $data['duracion_semestres'] ?? 8,
                 'descripcion' => $data['descripcion'] ?? null,
                 'estado' => 'activo'

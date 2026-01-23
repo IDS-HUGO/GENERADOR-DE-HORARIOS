@@ -11,6 +11,8 @@ if (!isAuthenticated()) {
 
 $action = $_GET['action'] ?? '';
 $user = getCurrentUser();
+$esDirector = $user['tipo_usuario'] === 'director';
+$esAdmin = $user['tipo_usuario'] === 'administrador';
 
 try {
     switch ($action) {
@@ -24,6 +26,19 @@ try {
             jsonResponse(true, '', $horarios);
             break;
 
+        case 'gestion':
+            // Vista completa para gestión (admin/director)
+            if (!$esAdmin && !$esDirector) {
+                jsonResponse(false, 'No autorizado', null, 403);
+            }
+            $filtros = [];
+            if (isset($_GET['grupo_id'])) $filtros['grupo_id'] = $_GET['grupo_id'];
+            if (isset($_GET['docente_id'])) $filtros['docente_id'] = $_GET['docente_id'];
+
+            $horarios = (new Horario())->getActivos($filtros);
+            jsonResponse(true, 'Listado de horarios con contexto', $horarios);
+            break;
+
         case 'get':
             $id = $_GET['id'] ?? null;
             if (!$id) jsonResponse(false, 'ID requerido', null, 400);
@@ -35,14 +50,14 @@ try {
             break;
 
         case 'create':
-            // Crear horario
-            if ($user['tipo_usuario'] !== 'administrador' && $user['tipo_usuario'] !== 'coordinador') {
+            // Crear horario (requiere asignación previa)
+            if (!$esAdmin && !$esDirector) {
                 jsonResponse(false, 'No autorizado', null, 403);
             }
 
             $data = json_decode(file_get_contents('php://input'), true);
 
-            $campos = ['grupo_id', 'materia_id', 'docente_id', 'aula', 'dia_semana', 'hora_inicio', 'hora_fin'];
+            $campos = ['asignacion_id', 'dia_semana', 'hora_inicio', 'hora_fin'];
             foreach ($campos as $campo) {
                 if (empty($data[$campo])) {
                     jsonResponse(false, "Campo $campo requerido", null, 400);
@@ -50,14 +65,15 @@ try {
             }
 
             $horarioId = (new Horario())->create([
-                'grupo_id' => $data['grupo_id'],
-                'materia_id' => $data['materia_id'],
-                'docente_id' => $data['docente_id'],
-                'aula' => $data['aula'],
+                'asignacion_id' => $data['asignacion_id'],
                 'dia_semana' => $data['dia_semana'],
                 'hora_inicio' => $data['hora_inicio'],
                 'hora_fin' => $data['hora_fin'],
-                'estado' => 'activo'
+                'aula_id' => $data['aula_id'] ?? null,
+                'estado_horario' => $data['estado_horario'] ?? 'pendiente',
+                'confirmado' => 0,
+                'conflicto_detectado' => $data['conflicto_detectado'] ?? 0,
+                'observaciones' => $data['observaciones'] ?? null
             ]);
 
             jsonResponse(true, 'Horario creado', ['id' => $horarioId]);
@@ -65,7 +81,7 @@ try {
 
         case 'update':
             // Actualizar horario
-            if ($user['tipo_usuario'] !== 'administrador' && $user['tipo_usuario'] !== 'coordinador') {
+            if (!$esAdmin && !$esDirector) {
                 jsonResponse(false, 'No autorizado', null, 403);
             }
 
@@ -75,10 +91,13 @@ try {
             if (!$id) jsonResponse(false, 'ID requerido', null, 400);
 
             $updateData = array_filter([
-                'aula' => $data['aula'] ?? null,
+                'aula_id' => $data['aula_id'] ?? null,
                 'hora_inicio' => $data['hora_inicio'] ?? null,
                 'hora_fin' => $data['hora_fin'] ?? null,
-                'estado' => $data['estado'] ?? null
+                'estado_horario' => $data['estado_horario'] ?? null,
+                'confirmado' => $data['confirmado'] ?? null,
+                'conflicto_detectado' => $data['conflicto_detectado'] ?? null,
+                'observaciones' => $data['observaciones'] ?? null
             ], fn($v) => $v !== null);
 
             if (!empty($updateData)) {
@@ -88,16 +107,33 @@ try {
             jsonResponse(true, 'Horario actualizado');
             break;
 
+        case 'approve':
+            // Aprobar/Rechazar horario (director/admin)
+            if (!$esAdmin && !$esDirector) {
+                jsonResponse(false, 'No autorizado', null, 403);
+            }
+
+            $data = json_decode(file_get_contents('php://input'), true);
+            $horario_id = $data['id'] ?? null;
+            $estado = $data['estado'] ?? 'aprobado';
+            $observaciones = $data['observaciones'] ?? null;
+
+            if (!$horario_id) jsonResponse(false, 'ID requerido', null, 400);
+
+            (new Horario())->aprobarHorario($horario_id, $user['usuario_id'], $esDirector ? 'director' : 'administrador', $estado, $observaciones);
+            jsonResponse(true, 'Horario actualizado');
+            break;
+
         case 'delete':
             // Eliminar horario
-            if ($user['tipo_usuario'] !== 'administrador') {
+            if (!$esAdmin && !$esDirector) {
                 jsonResponse(false, 'No autorizado', null, 403);
             }
 
             $id = $_GET['id'] ?? null;
             if (!$id) jsonResponse(false, 'ID requerido', null, 400);
 
-            (new Horario())->update($id, ['estado' => 'inactivo']);
+            (new Horario())->delete($id);
             jsonResponse(true, 'Horario eliminado');
             break;
 

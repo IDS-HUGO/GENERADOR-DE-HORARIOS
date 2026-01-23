@@ -42,12 +42,22 @@ try {
     $_SESSION['tipo_usuario'] = $user['tipo_usuario'];
     $_SESSION['login_time'] = time();
 
-    // Construir URL de redirección dinámicamente
+    // Construir URL de redirección dinámicamente según rol
     // APP_URL ya tiene la carpeta del proyecto
     // Ejemplo: http://localhost/ClassControl
-    $redirect = ($user['tipo_usuario'] === 'docente') 
-        ? APP_URL . '/public/docente/dashboard.php' 
-        : APP_URL . '/public/admin/dashboard.php';
+    switch ($user['tipo_usuario']) {
+        case 'director':
+            $redirect = APP_URL . '/public/admin/dashboard.php?role=director';
+            break;
+        case 'administrador':
+            $redirect = APP_URL . '/public/admin/dashboard.php';
+            break;
+        case 'docente':
+            $redirect = APP_URL . '/public/docente/dashboard.php';
+            break;
+        default:
+            $redirect = APP_URL . '/public/index.html';
+    }
 
     error_log('[LOGIN] Éxito. Redirect: ' . $redirect);
 

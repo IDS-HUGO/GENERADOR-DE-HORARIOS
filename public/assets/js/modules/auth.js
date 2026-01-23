@@ -25,6 +25,8 @@ async function handleLogin(e) {
         console.log('[LOGIN] Respuesta:', response);
 
         if (response && response.success) {
+            const payload = response.data || response;
+
             // Guardar credenciales si marca "recuérdame"
             if (rememberMe) {
                 Forms.saveCredentials(formData.email, formData.password);
@@ -33,19 +35,21 @@ async function handleLogin(e) {
                 Forms.clearCredentials();
             }
             
-            const msg = '✅ ¡Bienvenido ' + (response.nombre || 'Usuario') + '!';
+            const msg = '✅ ¡Bienvenido ' + (payload.nombre || 'Usuario') + '!';
             showAlert(msg, 'success', 1000);
             
             // Usar redirect del servidor (dinámico)
-            let redirectUrl = response.redirect;
+            let redirectUrl = payload.redirect;
             
             if (!redirectUrl) {
-                // Fallback: construir URL dinámicamente
+                // Fallback: construir URL dinámicamente y respetar rol
                 const { origin, pathname } = window.location;
                 const pathParts = pathname.split('/').filter(p => p);
                 const publicIndex = pathParts.indexOf('public');
                 const projectFolder = publicIndex > 0 ? pathParts[0] : '';
-                redirectUrl = projectFolder ? origin + '/' + projectFolder + '/public/admin/dashboard.php' : origin + '/public/admin/dashboard.php';
+                const base = projectFolder ? origin + '/' + projectFolder : origin;
+                const dashPath = payload.tipo_usuario === 'docente' ? '/public/docente/dashboard.php' : '/public/admin/dashboard.php';
+                redirectUrl = base + dashPath;
             }
             
             console.log('[LOGIN] Redirect a:', redirectUrl);

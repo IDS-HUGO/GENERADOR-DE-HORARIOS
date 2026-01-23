@@ -4,6 +4,7 @@
  */
 
 require_once '../config.php';
+require_once INCLUDES_PATH . '/Models.php';
 
 if (!isAuthenticated()) {
     jsonResponse(false, 'No autorizado', null, 401);
@@ -61,9 +62,11 @@ try {
                 'programa_id' => $data['programa_id'],
                 'creditos' => $data['creditos'],
                 'semestre' => $data['semestre'],
-                'obligatoria' => $data['obligatoria'] ?? true,
+                'es_obligatoria' => $data['es_obligatoria'] ?? true,
+                'tipo_materia' => $data['tipo_materia'] ?? 'teorica',
+                'horas_semana' => $data['horas_semana'] ?? 3,
                 'descripcion' => $data['descripcion'] ?? null,
-                'estado' => 'activo'
+                'estado' => 'activa'
             ]);
             
             jsonResponse(true, 'Materia creada correctamente', ['id' => $id]);

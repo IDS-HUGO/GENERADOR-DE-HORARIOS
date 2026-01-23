@@ -296,6 +296,12 @@ function redirect(url) {
     window.location.href = url;
 }
 
+function htmlEscape(text) {
+    if (!text) return '';
+    const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+    return text.replace(/[&<>"']/g, m => map[m]);
+}
+
 // ============================================
 // AUTO INIT
 // ============================================
@@ -336,6 +342,31 @@ window.Utils = {
     getUrlParams,
     redirect
 };
+
+// Exponer funciones globalmente para acceso directo desde HTML/PHP
+window.API_BASE_URL = API_BASE_URL;
+window.api = api;
+window.showAlert = showAlert;
+window.showModal = showModal;
+window.closeModal = closeModal;
+window.showLoading = showLoading;
+window.getFormData = getFormData;
+window.validateEmail = validateEmail;
+window.validatePassword = validatePassword;
+window.saveCredentials = saveCredentials;
+window.loadCredentials = loadCredentials;
+window.clearCredentials = clearCredentials;
+window.handleLogin = handleLogin;
+window.loadSavedCredentials = loadSavedCredentials;
+window.formatDate = formatDate;
+window.formatTime = formatTime;
+window.formatCurrency = formatCurrency;
+window.capitalize = capitalize;
+window.clearForm = clearForm;
+window.disableForm = disableForm;
+window.getUrlParams = getUrlParams;
+window.redirect = redirect;
+window.htmlEscape = htmlEscape;
 
 console.log('[UTILS] All functions available globally');
 

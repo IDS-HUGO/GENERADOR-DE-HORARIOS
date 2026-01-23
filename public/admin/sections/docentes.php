@@ -30,38 +30,76 @@
             <button class="modal-close" onclick="closeDocenteModal()">&times;</button>
         </div>
         <div class="modal-body">
+            <div id="docente-info" class="alert alert-info hidden" style="margin-bottom: 20px;">
+                <strong>✅ ¡Docente creado!</strong>
+                <p style="margin: 8px 0 0 0;">La contraseña temporal y las credenciales han sido enviadas al email del docente.</p>
+            </div>
             <form id="form-docente" onsubmit="submitDocente(event)">
                 <div class="form-row">
                     <div class="form-group">
-                        <label>Nombre</label>
+                        <label>Nombre <span style="color: red;">*</span></label>
                         <input type="text" name="nombre" required>
                     </div>
                     <div class="form-group">
-                        <label>Apellido</label>
+                        <label>Apellido <span style="color: red;">*</span></label>
                         <input type="text" name="apellido" required>
                     </div>
                 </div>
                 <div class="form-group">
-                    <label>Email</label>
-                    <input type="email" name="email" required>
+                    <label>Email <span style="color: red;">*</span></label>
+                    <input type="email" name="email" required placeholder="ejemplo@gmail.com">
+                    <small style="color: #666;">Se usará para enviar las credenciales de acceso</small>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
-                        <label>Especialidad</label>
-                        <input type="text" name="especialidad" required>
+                        <label>Número de identificación</label>
+                        <input type="text" name="numero_identificacion" placeholder="CC/NIT">
                     </div>
                     <div class="form-group">
-                        <label>Teléfono</label>
-                        <input type="tel" name="telefono">
+                        <label>Especialidad <span style="color: red;">*</span></label>
+                        <input type="text" name="especialidad" required placeholder="Ej: Matemáticas, Inglés">
                     </div>
                 </div>
-                <div class="form-group">
-                    <label>Horas asignadas</label>
-                    <input type="number" name="horas_asignadas" min="1" max="50" value="20">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Horas asignadas</label>
+                        <input type="number" name="horas_asignadas" min="1" max="50" value="20">
+                    </div>
+                    <div class="form-group">
+                        <label>Horas máximas semanales</label>
+                        <input type="number" name="horas_maximas_semanales" min="1" max="60" value="40">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Antigüedad (años)</label>
+                        <input type="number" name="antiguedad" min="0" max="50" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label>Tipo de contrato</label>
+                        <select name="tipo_contrato">
+                            <option value="por_horas">Por horas</option>
+                            <option value="medio_tiempo">Medio tiempo</option>
+                            <option value="tiempo_completo">Tiempo completo</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Fecha de contratación</label>
+                        <input type="date" name="fecha_contratacion" value="<?php echo date('Y-m-d'); ?>">
+                    </div>
+                    <div class="form-group">
+                        <label>Foto (URL opcional)</label>
+                        <input type="text" name="foto_perfil" placeholder="http://...jpg">
+                    </div>
+                </div>
+                <div class="alert alert-warning">
+                    <strong>ℹ️ Nota:</strong> La contraseña se genera automáticamente. Si el correo falla se mostrará en la alerta.
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" onclick="closeDocenteModal()">Cancelar</button>
-                    <button type="submit" class="btn btn-primary">Guardar</button>
+                    <button type="submit" class="btn btn-primary">Crear Docente</button>
                 </div>
             </form>
         </div>
@@ -75,7 +113,10 @@
 
     function showDocenteModal() {
         const modal = document.getElementById('modal-docente');
-        if (modal) modal.classList.remove('hidden');
+        if (modal) {
+            modal.classList.remove('hidden');
+            document.getElementById('docente-info').classList.add('hidden');
+        }
     }
 
     function closeDocenteModal() {
@@ -101,7 +142,8 @@
                 </tr>
             `).join('');
         } catch (e) {
-            showAlert('error', 'No se pudieron cargar los docentes');
+            showAlert('Error cargando docentes', 'danger');
+            console.error(e);
         }
     }
 
@@ -109,31 +151,56 @@
         event.preventDefault();
         const form = event.target;
         const data = Object.fromEntries(new FormData(form));
+        
         try {
-            const resp = await api('/src/api/docentes.php?action=create', { method: 'POST', body: JSON.stringify(data) });
+            showLoading(true);
+            const resp = await api('/src/api/docentes.php?action=create', { 
+                method: 'POST', 
+                body: JSON.stringify(data) 
+            });
+            
             if (resp.success) {
-                showAlert('success', 'Docente registrado correctamente');
+                const c = resp.data || {};
+                const pass = c.password_temporal || c.temp_password || 'N/A';
+                const emailStatus = c.email_enviado ? '✉️ Email enviado' : '⚠️ Email NO enviado (comparte la contraseña manualmente)';
+
+                showAlert(`✅ Docente creado\n📧 ${c.email}\n🔐 ${pass}\n${emailStatus}`, 'success', 4000);
+                console.log('📊 Docente creado con credenciales:', c);
+
                 form.reset();
-                closeDocenteModal();
                 loadDocentes();
+                closeDocenteModal();
             } else {
-                showAlert('error', resp.message || 'Error al guardar');
+                showAlert('❌ ' + (resp.message || 'Error al guardar'), 'danger', 4000);
             }
         } catch (e) {
-            showAlert('error', 'Error al guardar');
+            console.error(e);
+            showAlert('❌ Error: ' + e.message, 'danger', 3000);
+        } finally {
+            showLoading(false);
         }
     }
 
     async function deleteDocente(id) {
         if (!confirm('¿Eliminar este docente?')) return;
         try {
-            const resp = await api('/src/api/docentes.php?action=delete', { method: 'POST', body: JSON.stringify({ id }) });
+            showLoading(true);
+            const resp = await api('/src/api/docentes.php?action=delete', { 
+                method: 'POST', 
+                body: JSON.stringify({ id }) 
+            });
             if (resp.success) {
-                showAlert('success', 'Docente eliminado');
+                showAlert('✅ Docente eliminado', 'success', 2000);
                 loadDocentes();
-            } else showAlert('error', resp.message || 'Error');
+            } else {
+                showAlert('❌ ' + (resp.message || 'Error'), 'danger', 3000);
+            }
         } catch (e) { 
-            showAlert('error', 'Error'); 
+            showAlert('❌ Error', 'danger', 3000);
+            console.error(e);
+        } finally {
+            showLoading(false);
         }
     }
 </script>
+

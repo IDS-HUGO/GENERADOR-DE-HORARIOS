@@ -6,6 +6,27 @@
  */
 
 // =====================================================
+// CARGAR VARIABLES DE ENTORNO (.env)
+// =====================================================
+function loadEnvFile() {
+    $envPath = dirname(__DIR__) . '/.env';
+    if (file_exists($envPath)) {
+        $lines = file($envPath, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+        foreach ($lines as $line) {
+            if (strpos($line, '=') === false || strpos($line, '#') === 0) continue;
+            list($key, $value) = explode('=', $line, 2);
+            $key = trim($key);
+            $value = trim($value);
+            if (!isset($_ENV[$key]) && !isset($_SERVER[$key])) {
+                putenv("$key=$value");
+                $_ENV[$key] = $value;
+            }
+        }
+    }
+}
+loadEnvFile();
+
+// =====================================================
 // CONFIGURACIÓN DE BASE DE DATOS
 // =====================================================
 define('DB_HOST', 'localhost');
@@ -69,6 +90,17 @@ define('PUBLIC_PATH', BASE_PATH . '/public');
 define('LOG_PATH', BASE_PATH . '/logs');
 define('VIEWS_PATH', SRC_PATH . '/views');
 define('INCLUDES_PATH', SRC_PATH . '/includes');
+
+// =====================================================
+// CONFIGURACIÓN DE EMAIL (GMAIL)
+// =====================================================
+define('MAIL_DRIVER', 'smtp');
+define('MAIL_HOST', 'smtp.gmail.com');
+define('MAIL_PORT', 587);
+define('MAIL_USERNAME', $_ENV['GMAIL_EMAIL'] ?? '');  // Gmail: tu-email@gmail.com
+define('MAIL_PASSWORD', $_ENV['GMAIL_PASSWORD'] ?? '');  // Gmail: Contraseña de aplicación (App Password)
+define('MAIL_FROM_NAME', 'ClassControl');
+define('MAIL_FROM_ADDRESS', $_ENV['GMAIL_EMAIL'] ?? '');
 
 // =====================================================
 // CARGAR MODELOS
@@ -196,6 +228,30 @@ function verifyPassword($password, $hash) {
     return password_verify($password, $hash);
 }
 
+/**
+ * Generar contraseña temporal segura
+ * Formato: Xx123456!
+ */
+function generateTemporaryPassword($length = 10) {
+    $uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    $lowercase = 'abcdefghijklmnopqrstuvwxyz';
+    $numbers = '0123456789';
+    $symbols = '!@#$%&*';
+    
+    $password = '';
+    $password .= $uppercase[rand(0, strlen($uppercase) - 1)];
+    $password .= $lowercase[rand(0, strlen($lowercase) - 1)];
+    $password .= $numbers[rand(0, strlen($numbers) - 1)];
+    $password .= $symbols[rand(0, strlen($symbols) - 1)];
+    
+    $all = $uppercase . $lowercase . $numbers . $symbols;
+    for ($i = 4; $i < $length; $i++) {
+        $password .= $all[rand(0, strlen($all) - 1)];
+    }
+    
+    return str_shuffle($password);
+}
+
 function sanitize($input) {
     return htmlspecialchars(trim($input), ENT_QUOTES, 'UTF-8');
 }
@@ -251,6 +307,181 @@ set_error_handler(function($errno, $errstr, $errfile, $errline) {
     logError('PHP Error', "$errstr in $errfile:$errline");
     return true;
 });
+
+/**
+ * Validar configuración SMTP antes de enviar
+ */
+function ensureMailConfigReady() {
+    $user = $_ENV['GMAIL_EMAIL'] ?? '';
+    $pass = $_ENV['GMAIL_PASSWORD'] ?? '';
+
+    if (empty($user) || empty($pass)) {
+        logError('SMTP_CONFIG', 'Falta GMAIL_EMAIL o GMAIL_PASSWORD en .env');
+        return false;
+    }
+
+    if (!extension_loaded('openssl')) {
+        logError('SMTP_CONFIG', 'La extensión openssl es requerida para SMTP');
+        return false;
+    }
+
+    return true;
+}
+
+/**
+ * Enviar email con credenciales vía SMTP Gmail (SSL 465 → STARTTLS 587)
+ */
+function enviarEmailCredenciales($email, $nombre, $apellido, $password) {
+    if (!ensureMailConfigReady()) {
+        return false;
+    }
+
+    $user = $_ENV['GMAIL_EMAIL'];
+    $pass = $_ENV['GMAIL_PASSWORD'];
+
+    if (!validateEmail($email)) {
+        logError('SMTP_EMAIL', 'Email destino inválido: ' . $email);
+        return false;
+    }
+
+    $asunto = 'ClassControl - Credenciales de Acceso';
+    $from = $user;
+    $body = "<!DOCTYPE html><html><body style='font-family:Arial,sans-serif'>"
+        . "<h2>Hola $nombre $apellido,</h2>"
+        . "<p>Tu cuenta en ClassControl ha sido creada.</p>"
+        . "<p><strong>Usuario:</strong> $email<br><strong>Contraseña temporal:</strong> $password</p>"
+        . "<p>Cambia tu contraseña en el primer acceso.</p>"
+        . "</body></html>";
+
+    try {
+        $sent = smtpSendGmail($from, $pass, $email, $asunto, $body);
+        if ($sent) {
+            logInfo('SMTP_SENT', ['to' => $email]);
+        }
+        return $sent;
+    } catch (Exception $e) {
+        logError('EMAIL_ERROR', $e->getMessage());
+        return false;
+    }
+}
+
+/**
+ * Envío SMTP sencillo con fallback y trazas detalladas
+ */
+function smtpSendGmail($fromEmail, $fromPass, $toEmail, $subject, $html) {
+    $host = 'smtp.gmail.com';
+    $timeout = 30;
+    $lastTrace = [];
+
+    // Intentar SSL 465 primero, luego STARTTLS 587
+    $attempts = [
+        ['scheme' => 'ssl', 'port' => 465],
+        ['scheme' => 'tcp', 'port' => 587]
+    ];
+
+    foreach ($attempts as $try) {
+        $trace = [];
+        $socket = @stream_socket_client("{$try['scheme']}://$host:{$try['port']}", $errno, $errstr, $timeout);
+        if (!$socket) {
+            $trace[] = "CONNECT FAIL {$try['scheme']}:{$try['port']} => $errno $errstr";
+            logError('SMTP_CONNECT', end($trace));
+            $lastTrace = $trace;
+            continue;
+        }
+
+        stream_set_timeout($socket, $timeout);
+
+        $readAll = function() use ($socket, &$trace, $try) {
+            $lines = [];
+            while (($line = fgets($socket, 515)) !== false) {
+                $line = trim($line);
+                $trace[] = "{$try['scheme']}:{$try['port']} << $line";
+                $lines[] = $line;
+                if (strlen($line) >= 4 && $line[3] !== '-') {
+                    break;
+                }
+            }
+            return end($lines) ?: '';
+        };
+
+        $write = function($data) use ($socket, &$trace, $try) {
+            $trace[] = "{$try['scheme']}:{$try['port']} >> $data";
+            fwrite($socket, $data . "\r\n");
+        };
+
+        $banner = $readAll();
+        if (strpos($banner, '220') !== 0) {
+            logError('SMTP_BANNER', $banner);
+            fclose($socket);
+            $lastTrace = $trace;
+            continue;
+        }
+
+        $write('EHLO localhost');
+        $readAll();
+
+        if ($try['port'] === 587) {
+            $write('STARTTLS');
+            $tlsResp = $readAll();
+            if (strpos($tlsResp, '220') !== 0 || !@stream_socket_enable_crypto($socket, true, STREAM_CRYPTO_METHOD_TLS_CLIENT)) {
+                logError('SMTP_TLS', $tlsResp ?: 'Fallo STARTTLS');
+                fclose($socket);
+                $lastTrace = $trace;
+                continue;
+            }
+            $write('EHLO localhost');
+            $readAll();
+        }
+
+        $write('AUTH LOGIN');
+        $readAll();
+        $write(base64_encode($fromEmail));
+        $readAll();
+        $write(base64_encode($fromPass));
+        $authResp = $readAll();
+        if (strpos($authResp, '235') !== 0) {
+            logError('SMTP_AUTH', $authResp);
+            fclose($socket);
+            $lastTrace = $trace;
+            continue;
+        }
+
+        $write('MAIL FROM: <' . $fromEmail . '>');
+        $readAll();
+        $write('RCPT TO: <' . $toEmail . '>');
+        $readAll();
+        $write('DATA');
+        $readAll();
+
+        $headers = [
+            'From: ' . $fromEmail,
+            'To: ' . $toEmail,
+            'Subject: ' . $subject,
+            'MIME-Version: 1.0',
+            'Content-Type: text/html; charset=UTF-8'
+        ];
+
+        $message = implode("\r\n", $headers) . "\r\n\r\n" . $html . "\r\n.\r\n";
+        $write($message);
+        $resp = $readAll();
+        $write('QUIT');
+        fclose($socket);
+
+        if (strpos($resp, '250') === 0) {
+            logInfo('SMTP_OK', ['port' => $try['port']]);
+            return true;
+        }
+
+        logError('SMTP_SEND', $resp ?: 'Respuesta vacía');
+        $lastTrace = $trace;
+    }
+
+    if (!empty($lastTrace)) {
+        logError('SMTP_TRACE', json_encode($lastTrace));
+    }
+
+    return false;
+}
 
 set_exception_handler(function($e) {
     logError('Exception', $e->getMessage());

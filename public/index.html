@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ClassControl - Sistema de Gestión de Horarios</title>
+    <title>ClassControl - Universidad Maya</title>
     <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
@@ -11,14 +11,22 @@
         <!-- PANEL DE INFORMACIÓN -->
         <div class="info-panel">
             <h1>ClassControl</h1>
-            <p>Sistema profesional de gestión de horarios académicos</p>
+            <p>Sistema de Gestión de Horarios Académicos</p>
+            <p style="font-size: 0.95rem; color: #666; margin-top: 5px;">Universidad Maya</p>
             
             <div class="features">
                 <div class="feature">
-                    <div class="feature-icon">⚙️</div>
+                    <div class="feature-icon">👥</div>
                     <div>
-                        <strong>Gestión Inteligente</strong>
-                        <p class="text-muted">Administra docentes, programas, materias y grupos</p>
+                        <strong>Gestión de Roles</strong>
+                        <p class="text-muted">Directores, Administradores y Docentes</p>
+                    </div>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">📚</div>
+                    <div>
+                        <strong>Selección Inteligente</strong>
+                        <p class="text-muted">Docentes eligen grupos y materias por antigüedad</p>
                     </div>
                 </div>
                 <div class="feature">
@@ -31,17 +39,14 @@
                 <div class="feature">
                     <div class="feature-icon">🔐</div>
                     <div>
-                        <strong>Roles y Permisos</strong>
-                        <p class="text-muted">Acceso diferenciado para administradores y docentes</p>
-                    </div>
-                </div>
-                <div class="feature">
-                    <div class="feature-icon">📊</div>
-                    <div>
                         <strong>Seguridad y Auditoría</strong>
-                        <p class="text-muted">Registros de actividad y control de acceso</p>
+                        <p class="text-muted">Control de acceso y registros de actividad</p>
                     </div>
                 </div>
+            </div>
+            
+            <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); font-size: 0.85rem; color: rgba(255,255,255,0.6);">
+                <p>&copy; 2026 Universidad Maya - Todos los derechos reservados</p>
             </div>
         </div>
 
@@ -88,11 +93,10 @@
 
                 <hr style="border: none; border-top: 1px solid var(--border-color); margin: 20px 0;">
 
-                <p class="text-center text-muted mb-3">¿Nuevo usuario? <a href="#" onclick="showModal('modal-registro')" style="color: var(--primary-light); text-decoration: none; font-weight: 600;">Solicitar acceso</a></p>
             </form>
             <div class="credentials-info">
-                <strong>👤 Cuenta de Demostración</strong>
-                <p style="margin: 8px 0 0 0; font-size: 0.9rem;">Solicite credenciales de prueba al administrador del sistema.</p>
+                <strong>Si eres administrador:</strong>
+                <p style="margin: 8px 0 0 0; font-size: 0.9rem;">Solicite credenciales al creador del sistema.</p>
             </div>
         </div>
     </div>
