@@ -1,0 +1,6 @@
+Enviar credenciales al administrador
+Eliminar boton de crear programa academico en director
+Eliminar boton de crear materias en director
+Eliminar boton de crear grupos en director
+logout redirije a no encontrado en docente
+Materias creadas por admin no aparecen en docente

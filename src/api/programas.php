@@ -48,17 +48,23 @@ try {
                 jsonResponse(false, 'El código del programa ya existe', null, 409);
             }
             
-            $id = (new ProgramaAcademico())->create([
-                'codigo' => $data['codigo'],
-                'nombre' => $data['nombre'],
-                'nivel' => $data['nivel'] ?? 'profesional',
-                'modalidad' => $data['modalidad'] ?? 'presencial',
-                'duracion_semestres' => $data['duracion_semestres'] ?? 8,
-                'descripcion' => $data['descripcion'] ?? null,
-                'estado' => 'activo'
-            ]);
-            
-            jsonResponse(true, 'Programa creado correctamente', ['id' => $id]);
+            try {
+                $id = (new ProgramaAcademico())->create([
+                    'codigo' => $data['codigo'],
+                    'nombre' => $data['nombre'],
+                    'nivel' => $data['nivel'] ?? 'profesional',
+                    'modalidad' => $data['modalidad'] ?? 'presencial',
+                    'duracion_semestres' => (int)($data['duracion_semestres'] ?? 8),
+                    'descripcion' => $data['descripcion'] ?? null,
+                    'estado' => 'activo'
+                ]);
+                
+                jsonResponse(true, 'Programa creado correctamente', ['id' => $id]);
+            } catch (Exception $e) {
+                error_log('[PROGRAMA CREATE ERROR] ' . $e->getMessage());
+                jsonResponse(false, 'Error: ' . $e->getMessage(), null, 500);
+            }
+            break;            jsonResponse(true, 'Programa creado correctamente', ['id' => $id]);
             break;
 
         case 'update':
@@ -94,7 +100,8 @@ try {
                 jsonResponse(false, 'Solo administradores pueden eliminar programas', null, 403);
             }
             
-            $id = $_GET['id'] ?? null;
+            $data = json_decode(file_get_contents('php://input'), true);
+            $id = $data['id'] ?? null;
             if (!$id) jsonResponse(false, 'ID requerido', null, 400);
             
             (new ProgramaAcademico())->update($id, ['estado' => 'inactivo']);

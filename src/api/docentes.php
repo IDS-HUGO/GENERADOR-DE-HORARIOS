@@ -105,9 +105,9 @@ try {
                     'usuario_id' => $usuarioId,
                     'numero_identificacion' => $data['numero_identificacion'] ?? null,
                     'especialidad' => $data['especialidad'],
-                    'horas_asignadas' => $data['horas_asignadas'] ?? 20,
-                    'horas_maximas_semanales' => $data['horas_maximas_semanales'] ?? 40,
-                    'antiguedad' => $data['antiguedad'] ?? 0,
+                    'horas_asignadas' => (int)($data['horas_asignadas'] ?? 20),
+                    'horas_maximas_semanales' => (int)($data['horas_maximas_semanales'] ?? 40),
+                    'antiguedad' => (int)($data['antiguedad'] ?? 0),
                     'tipo_contrato' => $data['tipo_contrato'] ?? 'por_horas',
                     'foto_perfil' => $data['foto_perfil'] ?? null,
                     'fecha_contratacion' => $data['fecha_contratacion'] ?? date('Y-m-d'),
@@ -125,6 +125,7 @@ try {
                     (new DisponibilidadHoraria())->createInitialAvailability($docenteId);
                 } catch (Exception $e) {
                     // No fallar si la disponibilidad no se crea
+                    error_log('[DISPONIBILIDAD] ' . $e->getMessage());
                 }
                 
                 // 4. ENVIAR EMAIL CON CREDENCIALES
@@ -159,6 +160,8 @@ try {
                 
             } catch (Exception $e) {
                 logError('DOCENTE_CREATE_ERROR', $e->getMessage());
+                error_log('[DOCENTE CREATE ERROR] ' . $e->getMessage() . ' at ' . $e->getFile() . ':' . $e->getLine());
+                error_log('[DOCENTE CREATE TRACE] ' . $e->getTraceAsString());
                 jsonResponse(false, 'Error: ' . $e->getMessage(), null, 500);
             }
             break;
@@ -380,7 +383,8 @@ try {
                 jsonResponse(false, 'Solo administradores pueden eliminar docentes', null, 403);
             }
             
-            $id = $_GET['id'] ?? null;
+            $data = json_decode(file_get_contents('php://input'), true);
+            $id = $data['id'] ?? null;
             if (!$id) jsonResponse(false, 'ID requerido', null, 400);
             
             $docente = (new Docente())->getById($id);

@@ -64,19 +64,24 @@ try {
                 }
             }
 
-            $horarioId = (new Horario())->create([
-                'asignacion_id' => $data['asignacion_id'],
-                'dia_semana' => $data['dia_semana'],
-                'hora_inicio' => $data['hora_inicio'],
-                'hora_fin' => $data['hora_fin'],
-                'aula_id' => $data['aula_id'] ?? null,
-                'estado_horario' => $data['estado_horario'] ?? 'pendiente',
-                'confirmado' => 0,
-                'conflicto_detectado' => $data['conflicto_detectado'] ?? 0,
-                'observaciones' => $data['observaciones'] ?? null
-            ]);
+            try {
+                $horarioId = (new Horario())->create([
+                    'asignacion_id' => (int)$data['asignacion_id'],
+                    'dia_semana' => $data['dia_semana'],
+                    'hora_inicio' => $data['hora_inicio'],
+                    'hora_fin' => $data['hora_fin'],
+                    'aula_id' => $data['aula_id'] ?? null,
+                    'estado_horario' => $data['estado_horario'] ?? 'pendiente',
+                    'confirmado' => 0,
+                    'conflicto_detectado' => (int)($data['conflicto_detectado'] ?? 0),
+                    'observaciones' => $data['observaciones'] ?? null
+                ]);
 
-            jsonResponse(true, 'Horario creado', ['id' => $horarioId]);
+                jsonResponse(true, 'Horario creado', ['id' => $horarioId]);
+            } catch (Exception $e) {
+                error_log('[HORARIO CREATE ERROR] ' . $e->getMessage());
+                jsonResponse(false, 'Error: ' . $e->getMessage(), null, 500);
+            }
             break;
 
         case 'update':
@@ -130,7 +135,8 @@ try {
                 jsonResponse(false, 'No autorizado', null, 403);
             }
 
-            $id = $_GET['id'] ?? null;
+            $data = json_decode(file_get_contents('php://input'), true);
+            $id = $data['id'] ?? null;
             if (!$id) jsonResponse(false, 'ID requerido', null, 400);
 
             (new Horario())->delete($id);

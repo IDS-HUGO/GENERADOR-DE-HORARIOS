@@ -51,17 +51,22 @@ try {
                 }
             }
             
-            $id = (new Grupo())->create([
-                'codigo' => $data['codigo'],
-                'nombre' => $data['nombre'],
-                'programa_id' => $data['programa_id'],
-                'semestre' => $data['semestre'],
-                'cantidad_estudiantes' => $data['cantidad_estudiantes'],
-                'jornada' => $data['jornada'] ?? 'matutina',
-                'estado' => 'activo'
-            ]);
-            
-            jsonResponse(true, 'Grupo creado correctamente', ['id' => $id]);
+            try {
+                $id = (new Grupo())->create([
+                    'codigo' => $data['codigo'],
+                    'nombre' => $data['nombre'],
+                    'programa_id' => (int)$data['programa_id'],
+                    'semestre' => (int)$data['semestre'],
+                    'cantidad_estudiantes' => (int)$data['cantidad_estudiantes'],
+                    'jornada' => $data['jornada'] ?? 'matutina',
+                    'estado' => 'activo'
+                ]);
+                
+                jsonResponse(true, 'Grupo creado correctamente', ['id' => $id]);
+            } catch (Exception $e) {
+                error_log('[GRUPO CREATE ERROR] ' . $e->getMessage());
+                jsonResponse(false, 'Error: ' . $e->getMessage(), null, 500);
+            }
             break;
 
         case 'update':
@@ -98,7 +103,8 @@ try {
                 jsonResponse(false, 'Solo administradores pueden eliminar grupos', null, 403);
             }
             
-            $id = $_GET['id'] ?? null;
+            $data = json_decode(file_get_contents('php://input'), true);
+            $id = $data['id'] ?? null;
             if (!$id) jsonResponse(false, 'ID requerido', null, 400);
             
             (new Grupo())->update($id, ['estado' => 'inactivo']);

@@ -56,20 +56,25 @@ try {
                 jsonResponse(false, 'El código de materia ya existe', null, 409);
             }
             
-            $id = (new Materia())->create([
-                'codigo' => $data['codigo'],
-                'nombre' => $data['nombre'],
-                'programa_id' => $data['programa_id'],
-                'creditos' => $data['creditos'],
-                'semestre' => $data['semestre'],
-                'es_obligatoria' => $data['es_obligatoria'] ?? true,
-                'tipo_materia' => $data['tipo_materia'] ?? 'teorica',
-                'horas_semana' => $data['horas_semana'] ?? 3,
-                'descripcion' => $data['descripcion'] ?? null,
-                'estado' => 'activa'
-            ]);
-            
-            jsonResponse(true, 'Materia creada correctamente', ['id' => $id]);
+            try {
+                $id = (new Materia())->create([
+                    'codigo' => $data['codigo'],
+                    'nombre' => $data['nombre'],
+                    'programa_id' => (int)$data['programa_id'],
+                    'creditos' => (int)$data['creditos'],
+                    'semestre' => (int)$data['semestre'],
+                    'es_obligatoria' => (bool)($data['es_obligatoria'] ?? true),
+                    'tipo_materia' => $data['tipo_materia'] ?? 'teorica',
+                    'horas_semana' => (int)($data['horas_semana'] ?? 3),
+                    'descripcion' => $data['descripcion'] ?? null,
+                    'estado' => 'activa'
+                ]);
+                
+                jsonResponse(true, 'Materia creada correctamente', ['id' => $id]);
+            } catch (Exception $e) {
+                error_log('[MATERIA CREATE ERROR] ' . $e->getMessage());
+                jsonResponse(false, 'Error: ' . $e->getMessage(), null, 500);
+            }
             break;
 
         case 'update':
@@ -106,7 +111,8 @@ try {
                 jsonResponse(false, 'Solo administradores pueden eliminar materias', null, 403);
             }
             
-            $id = $_GET['id'] ?? null;
+            $data = json_decode(file_get_contents('php://input'), true);
+            $id = $data['id'] ?? null;
             if (!$id) jsonResponse(false, 'ID requerido', null, 400);
             
             (new Materia())->update($id, ['estado' => 'inactivo']);
