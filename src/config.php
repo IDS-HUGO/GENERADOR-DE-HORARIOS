@@ -193,10 +193,12 @@ function initSession() {
         
         if (!isset($_SESSION['last_regenerate'])) {
             $_SESSION['last_regenerate'] = time();
-            session_regenerate_id(true);
+            // Usar false para preservar los datos de sesión al cambiar el ID
+            session_regenerate_id(false);
         } elseif (time() - $_SESSION['last_regenerate'] > 3600) {
             $_SESSION['last_regenerate'] = time();
-            session_regenerate_id(true);
+            // Usar false para preservar los datos de sesión al cambiar el ID
+            session_regenerate_id(false);
         }
     }
 }

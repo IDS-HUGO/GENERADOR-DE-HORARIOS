@@ -208,6 +208,14 @@ async function handleLogin(e) {
         });
 
         if (response && response.success) {
+
+            const userData = response.data || response
+
+            if (userData.tipo_usuario) {
+                console.log('[AUTH] Guardando rol:', userData.tipo_usuario);
+                localStorage.setItem('tipo_usuario', userData.tipo_usuario);
+            }
+
             if (rememberMe) {
                 saveCredentials(formData.email, formData.password);
             } else {
