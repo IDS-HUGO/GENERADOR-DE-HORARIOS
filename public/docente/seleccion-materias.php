@@ -1,4 +1,12 @@
-<!DOCTYPE html>
+<?php
+require_once '../../src/config.php';
+
+if (!isAuthenticated() || getCurrentUser()['tipo_usuario'] !== 'docente') {
+    redirect(baseUrl('/public/index.html'));
+}
+
+$user = getCurrentUser();
+?><!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -141,13 +149,23 @@
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>🎓 Selección de Materias y Grupos</h1>
-        <div>
-            <span id="nombre-docente"></span>
-            <button onclick="logout()" class="btn" style="background: #ef4444; color: white; margin-left: 10px;">Cerrar Sesión</button>
+    <nav class="navbar">
+        <div class="navbar-container">
+            <div class="navbar-brand">🎓 Universidad Maya - Portal Docente</div>
+            <ul class="navbar-menu">
+                <li><a href="dashboard.php" class="nav-link">Inicio</a></li>
+                <li><a href="seleccion-materias.php" class="nav-link active">📚 Seleccionar Materias</a></li>
+                <li><a href="mi-horario-semanal.php" class="nav-link">📅 Mi Horario</a></li>
+            </ul>
+            <div class="navbar-user">
+                <div class="user-info">
+                    <div class="user-name"><?php echo htmlspecialchars($user['nombre'] ?? 'Docente'); ?></div>
+                    <div class="user-role">👨‍🏫 Docente</div>
+                </div>
+                <button class="btn btn-sm btn-danger" onclick="logout()">Salir</button>
+            </div>
         </div>
-    </div>
+    </nav>
     
     <div class="seleccion-container">
         <!-- Estadísticas del docente -->
@@ -188,6 +206,7 @@
     </div>
     
     <script>
+        const API_BASE_URL = '/ClassControl';
         let grupoSeleccionado = null;
         
         async function cargarEstadisticas() {
