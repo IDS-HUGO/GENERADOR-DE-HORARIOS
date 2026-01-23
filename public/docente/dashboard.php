@@ -34,7 +34,7 @@ $docenteId = $docente['docente_id'] ?? 0;
                     <div class="user-name"><?php echo htmlspecialchars($user['nombre'] ?? 'Docente'); ?></div>
                     <div class="user-role">👨‍🏫 Docente</div>
                 </div>
-                <button class="btn-logout" id="btn-logout">Salir</button>
+                <button class="btn btn-sm btn-danger" id="btn-logout">Salir</button>
             </div>
         </div>
     </nav>

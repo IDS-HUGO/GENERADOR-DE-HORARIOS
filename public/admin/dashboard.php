@@ -49,7 +49,7 @@ if (!in_array($section, $valid_sections)) $section = 'dashboard';
                     <span class="user-name"><?php echo htmlspecialchars($user['nombre'] ?? 'Usuario'); ?></span>
                     <div style="font-size: 0.85rem; color: #999;"><?php echo $esDirector ? '🔐 Director' : '⚙️ Administrador'; ?></div>
                 </div>
-                <button class="btn btn-sm btn-secondary" id="logout-btn">Salir</button>
+                <button class="btn btn-sm btn-danger" id="logout-btn">Salir</button>
             </div>
         </div>
     </nav>

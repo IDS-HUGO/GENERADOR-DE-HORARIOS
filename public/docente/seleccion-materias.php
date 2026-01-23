@@ -145,7 +145,7 @@
         <h1>🎓 Selección de Materias y Grupos</h1>
         <div>
             <span id="nombre-docente"></span>
-            <button onclick="logout()" class="btn">Cerrar Sesión</button>
+            <button onclick="logout()" class="btn" style="background: #ef4444; color: white; margin-left: 10px;">Cerrar Sesión</button>
         </div>
     </div>
     
@@ -279,6 +279,7 @@
                         } else {
                             claseItem += ' disponible';
                             estado = '<span class="badge badge-confirmada">Disponible</span>';
+                            btnDisabled = '';
                         }
                         
                         return `
