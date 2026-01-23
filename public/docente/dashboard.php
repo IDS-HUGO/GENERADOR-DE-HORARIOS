@@ -69,7 +69,10 @@ $docenteId = $docente['docente_id'] ?? 0;
         </section>
 
         <section id="horario" class="section hidden">
-            <div class="page-header"><h1>Mi horario</h1></div>
+            <div class="page-header">
+                <h1>Mi horario</h1>
+                <button class="btn btn-primary" onclick="openModal('modal-crear-horario')">+ Crear Horario</button>
+            </div>
             <div class="card">
                 <div class="card-body">
                     <table class="table">
@@ -180,6 +183,51 @@ $docenteId = $docente['docente_id'] ?? 0;
         </div>
     </div>
 
+    <div id="modal-crear-horario" class="modal-overlay hidden">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 class="modal-title">Crear Horario</h2>
+                <button class="modal-close" data-close="modal-crear-horario">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="form-crear-horario">
+                    <div class="form-group">
+                        <label>Asignación (Materia - Grupo)</label>
+                        <select name="asignacion_id" id="select-asignacion" required>
+                            <option value="">Seleccione una asignación</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Día de la semana</label>
+                        <select name="dia_semana" required>
+                            <option value="">Seleccione un día</option>
+                            <option value="lunes">Lunes</option>
+                            <option value="martes">Martes</option>
+                            <option value="miercoles">Miércoles</option>
+                            <option value="jueves">Jueves</option>
+                            <option value="viernes">Viernes</option>
+                            <option value="sabado">Sábado</option>
+                        </select>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Hora inicio</label>
+                            <input type="time" name="hora_inicio" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Hora fin</label>
+                            <input type="time" name="hora_fin" required>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-close="modal-crear-horario">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Crear Horario</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <script>
         const DOCENTE_ID = <?php echo (int)$docenteId; ?>;
         const API_BASE = '<?php echo rtrim(baseUrl("src/api"), '/'); ?>';
@@ -199,6 +247,7 @@ $docenteId = $docente['docente_id'] ?? 0;
         document.getElementById('form-perfil').addEventListener('submit', editarPerfil);
         document.getElementById('form-disponibilidad').addEventListener('submit', saveDisponibilidad);
         document.getElementById('btn-reset-dispo').addEventListener('click', resetDisponibilidad);
+        document.getElementById('form-crear-horario').addEventListener('submit', crearHorario);
 
         document.addEventListener('DOMContentLoaded', () => {
             loadPerfil();
@@ -239,7 +288,14 @@ $docenteId = $docente['docente_id'] ?? 0;
 
         function openModal(id) {
             const modal = document.getElementById(id);
-            if (modal) modal.classList.remove('hidden');
+            if (modal) {
+                modal.classList.remove('hidden');
+                
+                // Si es el modal de crear horario, cargar asignaciones
+                if (id === 'modal-crear-horario') {
+                    cargarAsignacionesParaHorario();
+                }
+            }
         }
 
         function closeModal(id) {
@@ -464,6 +520,60 @@ $docenteId = $docente['docente_id'] ?? 0;
             document.getElementById('stat-materias').textContent = Object.keys(materiasMap).length;
             document.getElementById('stat-grupos').textContent = Object.keys(materiasMap).length;
             document.getElementById('stat-clases').textContent = horariosCache.filter(h => h.dia_semana).length || '0';
+        }
+
+        async function cargarAsignacionesParaHorario() {
+            const select = document.getElementById('select-asignacion');
+            select.innerHTML = '<option value="">Cargando...</option>';
+            
+            // Filtrar asignaciones sin horario o con horarios incompletos
+            const asignacionesMap = {};
+            horariosCache.forEach(h => {
+                const key = h.asignacion_id;
+                if (!asignacionesMap[key]) {
+                    asignacionesMap[key] = {
+                        asignacion_id: h.asignacion_id,
+                        materia: h.materia_nombre,
+                        grupo: h.grupo_codigo,
+                        horarios: []
+                    };
+                }
+                if (h.dia_semana) {
+                    asignacionesMap[key].horarios.push(h);
+                }
+            });
+            
+            const options = ['<option value="">Seleccione una asignación</option>'];
+            Object.values(asignacionesMap).forEach(asig => {
+                options.push(`<option value="${asig.asignacion_id}">${asig.materia} - ${asig.grupo} (${asig.horarios.length} horarios)</option>`);
+            });
+            
+            select.innerHTML = options.join('');
+        }
+
+        async function crearHorario(e) {
+            e.preventDefault();
+            const form = e.target;
+            const payload = {
+                asignacion_id: parseInt(form.asignacion_id.value),
+                dia_semana: form.dia_semana.value,
+                hora_inicio: form.hora_inicio.value,
+                hora_fin: form.hora_fin.value
+            };
+
+            const res = await apiJson(`${API_BASE}/docentes.php?action=crear_horario`, {
+                method: 'POST',
+                body: JSON.stringify(payload)
+            });
+
+            if (res.success) {
+                showAlert('Horario creado exitosamente', 'success');
+                closeModal('modal-crear-horario');
+                form.reset();
+                await loadHorario();
+            } else {
+                showAlert(res.message || 'No se pudo crear el horario', 'danger');
+            }
         }
     </script>
 </body>

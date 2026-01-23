@@ -252,6 +252,7 @@ try {
                       INNER JOIN grupos g ON a.grupo_id = g.grupo_id
                       LEFT JOIN programas_academicos p ON g.programa_id = p.programa_id
                       LEFT JOIN horarios h ON a.asignacion_id = h.asignacion_id
+                      LEFT JOIN aulas au ON h.aula_id = au.aula_id
                       WHERE a.docente_id = ?
                       ORDER BY g.codigo, COALESCE(h.dia_semana, ''), COALESCE(h.hora_inicio, '')";
             
@@ -263,6 +264,65 @@ try {
             $stmt->close();
 
             jsonResponse(true, '', $asignaciones);
+            break;
+
+        case 'crear_horario':
+            // Permitir que el docente cree sus propios horarios
+            if ($user['tipo_usuario'] !== 'docente') {
+                jsonResponse(false, 'Solo docentes pueden crear horarios', null, 403);
+            }
+
+            $data = json_decode(file_get_contents('php://input'), true);
+            $docenteModel = new Docente();
+            $docente = $docenteModel->getByUserId($user['usuario_id']);
+
+            if (!$docente) {
+                jsonResponse(false, 'Perfil de docente no encontrado', null, 404);
+            }
+
+            $docente_id = $docente['docente_id'];
+            
+            // Validar campos requeridos
+            $campos = ['asignacion_id', 'dia_semana', 'hora_inicio', 'hora_fin'];
+            foreach ($campos as $campo) {
+                if (empty($data[$campo])) {
+                    jsonResponse(false, "Campo $campo requerido", null, 400);
+                }
+            }
+
+            $db = getDatabase();
+            
+            // Verificar que la asignación pertenece al docente
+            $checkQuery = "SELECT * FROM asignaciones WHERE asignacion_id = ? AND docente_id = ?";
+            $stmt = $db->prepare($checkQuery);
+            $stmt->bind_param("ii", $data['asignacion_id'], $docente_id);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            if ($result->num_rows === 0) {
+                $stmt->close();
+                jsonResponse(false, 'No tienes permiso para crear horarios en esta asignación', null, 403);
+            }
+            $stmt->close();
+
+            // Verificar conflictos de horario
+            $horarioModel = new Horario();
+            if ($horarioModel->hayConflicto($docente_id, $data['dia_semana'], $data['hora_inicio'], $data['hora_fin'])) {
+                jsonResponse(false, 'Ya tienes un horario asignado en ese día y hora', null, 409);
+            }
+
+            // Crear horario
+            $horarioId = $horarioModel->create([
+                'asignacion_id' => $data['asignacion_id'],
+                'dia_semana' => $data['dia_semana'],
+                'hora_inicio' => $data['hora_inicio'],
+                'hora_fin' => $data['hora_fin'],
+                'aula_id' => $data['aula_id'] ?? null,
+                'estado_horario' => 'pendiente',
+                'confirmado' => 0,
+                'conflicto_detectado' => 0
+            ]);
+
+            jsonResponse(true, 'Horario creado correctamente', ['horario_id' => $horarioId]);
             break;
 
         case 'update_self':
