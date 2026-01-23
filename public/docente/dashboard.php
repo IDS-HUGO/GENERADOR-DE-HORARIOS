@@ -359,11 +359,14 @@ $docenteId = $docente['docente_id'] ?? 0;
         }
 
         async function loadHorario() {
-            const res = await apiJson(`${API_BASE}/horarios.php?action=list&docente_id=${DOCENTE_ID}`);
+            // Cargar asignaciones confirmadas con horarios
+            const res = await apiJson(`${API_BASE}/docentes.php?action=asignaciones_confirmadas`);
             if (!res.success) {
-                showAlert(res.message || 'No se pudo cargar horario', 'danger');
+                showAlert(res.message || 'No se pudo cargar horarios', 'danger');
+                document.getElementById('horario-tbody').innerHTML = '<tr><td colspan="6" class="text-center text-muted">Error al cargar horarios</td></tr>';
                 return;
             }
+            
             horariosCache = res.data || [];
             renderHorario(horariosCache);
         }
@@ -375,16 +378,48 @@ $docenteId = $docente['docente_id'] ?? 0;
                 return;
             }
 
-            tbody.innerHTML = horarios.map(h => `
-                <tr>
-                    <td>${h.dia_semana || ''}</td>
-                    <td>${h.hora_inicio || ''}</td>
-                    <td>${h.hora_fin || ''}</td>
-                    <td>${h.materia_nombre || ''}</td>
-                    <td>${h.grupo_codigo || ''}</td>
-                    <td>${h.aula_codigo || ''}</td>
-                </tr>
-            `).join('');
+            // Agrupar por asignación para mostrar cada materia/grupo una sola vez
+            const grouped = {};
+            horarios.forEach(h => {
+                const key = `${h.asignacion_id}`;
+                if (!grouped[key]) {
+                    grouped[key] = [];
+                }
+                grouped[key].push(h);
+            });
+
+            const rows = [];
+            Object.values(grouped).forEach(items => {
+                const first = items[0];
+                const horariosItems = items.filter(i => i.dia_semana);
+                
+                if (horariosItems.length === 0) {
+                    // Sin horario asignado aún
+                    rows.push(`
+                        <tr style="opacity: 0.7;">
+                            <td colspan="6" class="text-center text-muted">
+                                ${first.materia_nombre || ''} (${first.grupo_codigo || ''}) - Sin horario asignado aún
+                            </td>
+                        </tr>
+                    `);
+                } else {
+                    // Con horarios asignados
+                    horariosItems.forEach((h, idx) => {
+                        rows.push(`
+                            <tr>
+                                <td>${h.dia_semana || ''}</td>
+                                <td>${h.hora_inicio || ''}</td>
+                                <td>${h.hora_fin || ''}</td>
+                                <td>${h.materia_nombre || ''}</td>
+                                <td>${h.grupo_codigo || ''}</td>
+                                <td>${h.aula_codigo || '-'}</td>
+                            </tr>
+                        `);
+                    });
+                }
+            });
+
+            tbody.innerHTML = rows.join('');
 
             renderMateriasDesdeHorario();
         }
@@ -400,21 +435,27 @@ $docenteId = $docente['docente_id'] ?? 0;
             horariosCache.forEach(h => {
                 const key = `${h.materia_id || ''}-${h.grupo_id || ''}`;
                 if (!materiasMap[key]) {
-                    materiasMap[key] = [];
+                    materiasMap[key] = {
+                        materia: h.materia_nombre || 'Sin nombre',
+                        grupo: h.grupo_codigo || 'Sin código',
+                        aula: h.aula_codigo || '-',
+                        horarios: []
+                    };
                 }
-                materiasMap[key].push(h);
+                if (h.dia_semana && h.hora_inicio && h.hora_fin) {
+                    materiasMap[key].horarios.push(`${h.dia_semana} ${h.hora_inicio}-${h.hora_fin}`);
+                }
             });
 
-            const rows = Object.values(materiasMap).map(arr => {
-                const base = arr[0];
-                const horariosTexto = arr.map(h => `${h.dia_semana} ${h.hora_inicio}-${h.hora_fin}`).join(', ');
+            const rows = Object.values(materiasMap).map(item => {
+                const horariosTexto = item.horarios.length > 0 ? item.horarios.join(', ') : 'Por definir';
                 return `
                     <tr>
-                        <td>${base.materia_nombre || ''}</td>
-                        <td>${base.grupo_codigo || ''}</td>
-                        <td>${arr[0].dia_semana || ''}</td>
+                        <td>${item.materia}</td>
+                        <td>${item.grupo}</td>
+                        <td>${horariosTexto.split(' ')[0] || '-'}</td>
                         <td>${horariosTexto}</td>
-                        <td>${base.aula_codigo || ''}</td>
+                        <td>${item.aula}</td>
                     </tr>`;
             });
 
@@ -422,7 +463,7 @@ $docenteId = $docente['docente_id'] ?? 0;
 
             document.getElementById('stat-materias').textContent = Object.keys(materiasMap).length;
             document.getElementById('stat-grupos').textContent = Object.keys(materiasMap).length;
-            document.getElementById('stat-clases').textContent = horariosCache.length;
+            document.getElementById('stat-clases').textContent = horariosCache.filter(h => h.dia_semana).length || '0';
         }
     </script>
 </body>

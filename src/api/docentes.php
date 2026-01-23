@@ -208,6 +208,63 @@ try {
             jsonResponse(true, 'Docente actualizado correctamente');
             break;
 
+        case 'asignaciones_confirmadas':
+            // Obtener asignaciones confirmadas del docente con horarios si existen
+            if ($user['tipo_usuario'] !== 'docente') {
+                jsonResponse(false, 'Solo docentes pueden consultar asignaciones', null, 403);
+            }
+
+            $docenteModel = new Docente();
+            $docente = $docenteModel->getByUserId($user['usuario_id']);
+
+            if (!$docente) {
+                jsonResponse(false, 'Perfil de docente no encontrado', null, 404);
+            }
+
+            $docente_id = $docente['docente_id'];
+            $db = getDatabase();
+            
+            // Obtener asignaciones confirmadas con horarios si existen
+            // Incluye estados: confirmada, asignada y cualquier otra que tenga un docente_id
+            $query = "SELECT 
+                        a.asignacion_id,
+                        a.docente_id,
+                        a.materia_id,
+                        a.grupo_id,
+                        a.estado as asignacion_estado,
+                        m.nombre as materia_nombre,
+                        m.codigo as materia_codigo,
+                        m.creditos,
+                        m.horas_semana,
+                        g.nombre as grupo_nombre,
+                        g.codigo as grupo_codigo,
+                        g.semestre,
+                        g.jornada,
+                        h.horario_id,
+                        h.dia_semana,
+                        h.hora_inicio,
+                        h.hora_fin,
+                        h.estado_horario,
+                        au.codigo as aula_codigo,
+                        p.nombre as programa_nombre
+                      FROM asignaciones a
+                      INNER JOIN materias m ON a.materia_id = m.materia_id
+                      INNER JOIN grupos g ON a.grupo_id = g.grupo_id
+                      LEFT JOIN programas_academicos p ON g.programa_id = p.programa_id
+                      LEFT JOIN horarios h ON a.asignacion_id = h.asignacion_id
+                      WHERE a.docente_id = ?
+                      ORDER BY g.codigo, COALESCE(h.dia_semana, ''), COALESCE(h.hora_inicio, '')";
+            
+            $stmt = $db->prepare($query);
+            $stmt->bind_param("i", $docente_id);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $asignaciones = $result->fetch_all(MYSQLI_ASSOC);
+            $stmt->close();
+
+            jsonResponse(true, '', $asignaciones);
+            break;
+
         case 'update_self':
             // Permitir que el docente actual edite su información básica
             if ($user['tipo_usuario'] !== 'docente') {
