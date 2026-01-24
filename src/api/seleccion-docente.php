@@ -59,6 +59,12 @@ try {
                     $solicitudes = $docente_model->getMisSolicitudes($docente_id);
                     echo json_encode(['success' => true, 'data' => $solicitudes]);
                     break;
+                
+                case 'asignadas':
+                    // Obtener materias asignadas al docente
+                    $asignadas = $docente_model->getMateriasAsignadas($docente_id);
+                    echo json_encode(['success' => true, 'data' => $asignadas]);
+                    break;
                     
                 case 'estadisticas':
                     // Estadísticas del docente

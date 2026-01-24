@@ -91,14 +91,11 @@ class Docente extends Model {
                     m.semestre,
                     g.nombre as grupo_nombre,
                     CASE WHEN a.asignacion_id IS NOT NULL THEN 1 ELSE 0 END as ya_asignada,
-                    CASE WHEN a.docente_id = ? THEN 1 ELSE 0 END as asignada_a_mi,
-                    GROUP_CONCAT(CONCAT(h.dia_semana, ' ', h.hora_inicio, '-', h.hora_fin) ORDER BY FIELD(h.dia_semana, 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado', 'domingo') SEPARATOR ' | ') as horarios
+                    CASE WHEN a.docente_id = ? THEN 1 ELSE 0 END as asignada_a_mi
                   FROM materias m
                   INNER JOIN grupos g ON m.programa_id = g.programa_id AND m.semestre = g.semestre
                   LEFT JOIN asignaciones a ON m.materia_id = a.materia_id AND g.grupo_id = a.grupo_id
-                  LEFT JOIN horarios h ON m.materia_id = h.materia_id AND g.grupo_id = h.grupo_id
                   WHERE g.grupo_id = ? AND m.estado = 'activa'
-                  GROUP BY m.materia_id, g.grupo_id
                   ORDER BY m.codigo";
         $stmt = $this->db->prepare($query);
         $stmt->bind_param("ii", $docente_id, $grupo_id);
@@ -170,6 +167,46 @@ class Docente extends Model {
                   INNER JOIN grupos g ON a.grupo_id = g.grupo_id
                   WHERE a.docente_id = ? AND a.solicitada_por_docente = TRUE
                   ORDER BY a.estado, a.fecha_solicitud DESC";
+        $stmt = $this->db->prepare($query);
+        $stmt->bind_param("i", $docente_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $data = $result->fetch_all(MYSQLI_ASSOC);
+        $stmt->close();
+        return $data;
+    }
+
+    /**
+     * Obtener materias asignadas al docente con sus horarios
+     */
+    public function getMateriasAsignadas($docente_id) {
+        $query = "SELECT 
+                    a.asignacion_id,
+                    m.materia_id,
+                    m.nombre,
+                    m.codigo,
+                    m.creditos,
+                    m.horas_semana,
+                    g.grupo_id,
+                    g.nombre as grupo_nombre,
+                    g.codigo as grupo_codigo,
+                    g.semestre,
+                    g.jornada,
+                    g.cantidad_estudiantes,
+                    p.nombre as programa_nombre,
+                    a.estado,
+                    a.prioridad_asignacion,
+                    a.fecha_asignacion,
+                    GROUP_CONCAT(CONCAT(h.dia_semana, ' ', h.hora_inicio, '-', h.hora_fin, ' (Aula: ', COALESCE(au.nombre, 'Por definir'), ')') ORDER BY FIELD(h.dia_semana, 'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado', 'domingo'), h.hora_inicio SEPARATOR ' | ') as horarios
+                  FROM asignaciones a
+                  INNER JOIN materias m ON a.materia_id = m.materia_id
+                  INNER JOIN grupos g ON a.grupo_id = g.grupo_id
+                  INNER JOIN programas_academicos p ON g.programa_id = p.programa_id
+                  LEFT JOIN horarios h ON a.asignacion_id = h.asignacion_id
+                  LEFT JOIN aulas au ON h.aula_id = au.aula_id
+                  WHERE a.docente_id = ?
+                  GROUP BY a.asignacion_id
+                  ORDER BY g.semestre, m.codigo";
         $stmt = $this->db->prepare($query);
         $stmt->bind_param("i", $docente_id);
         $stmt->execute();
