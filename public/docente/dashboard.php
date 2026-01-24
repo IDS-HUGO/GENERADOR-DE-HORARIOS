@@ -11,6 +11,7 @@ $docenteId = $docente['docente_id'] ?? 0;
 ?>
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -18,6 +19,7 @@ $docenteId = $docente['docente_id'] ?? 0;
     <link rel="stylesheet" href="../assets/css/style.css">
     <script src="../assets/js/utils.js?v=2.1"></script>
 </head>
+
 <body>
     <nav class="navbar">
         <div class="navbar-container">
@@ -45,7 +47,9 @@ $docenteId = $docente['docente_id'] ?? 0;
         <section id="inicio" class="section">
             <div class="grid grid-2" style="gap: 16px;">
                 <div class="card">
-                    <div class="card-header"><h3 class="card-title">Información personal</h3></div>
+                    <div class="card-header">
+                        <h3 class="card-title">Información personal</h3>
+                    </div>
                     <div class="card-body">
                         <p><strong>Nombre:</strong> <span id="info-nombre"><?php echo htmlspecialchars($user['nombre'] ?? ''); ?></span></p>
                         <p><strong>Apellido:</strong> <span id="info-apellido"><?php echo htmlspecialchars($user['apellido'] ?? ''); ?></span></p>
@@ -57,12 +61,26 @@ $docenteId = $docente['docente_id'] ?? 0;
                 </div>
 
                 <div class="card">
-                    <div class="card-header"><h3 class="card-title">Resumen</h3></div>
+                    <div class="card-header">
+                        <h3 class="card-title">Resumen</h3>
+                    </div>
                     <div class="card-body grid grid-2" style="gap: 12px;">
-                        <div class="stat-card primary"><div class="stat-label">Materias</div><div class="stat-value" id="stat-materias">0</div></div>
-                        <div class="stat-card success"><div class="stat-label">Grupos</div><div class="stat-value" id="stat-grupos">0</div></div>
-                        <div class="stat-card warning"><div class="stat-label">Clases</div><div class="stat-value" id="stat-clases">0</div></div>
-                        <div class="stat-card info"><div class="stat-label">Horas máx.</div><div class="stat-value" id="stat-horas"><?php echo htmlspecialchars($docente['horas_maximas_semanales'] ?? '0'); ?></div></div>
+                        <div class="stat-card primary">
+                            <div class="stat-label">Materias</div>
+                            <div class="stat-value" id="stat-materias">0</div>
+                        </div>
+                        <div class="stat-card success">
+                            <div class="stat-label">Grupos</div>
+                            <div class="stat-value" id="stat-grupos">0</div>
+                        </div>
+                        <div class="stat-card warning">
+                            <div class="stat-label">Clases</div>
+                            <div class="stat-value" id="stat-clases">0</div>
+                        </div>
+                        <div class="stat-card info">
+                            <div class="stat-label">Horas máx.</div>
+                            <div class="stat-value" id="stat-horas"><?php echo htmlspecialchars($docente['horas_maximas_semanales'] ?? '0'); ?></div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -87,7 +105,9 @@ $docenteId = $docente['docente_id'] ?? 0;
                             </tr>
                         </thead>
                         <tbody id="horario-tbody">
-                            <tr><td colspan="6" class="text-center text-muted">Cargando...</td></tr>
+                            <tr>
+                                <td colspan="6" class="text-center text-muted">Cargando...</td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
@@ -95,13 +115,15 @@ $docenteId = $docente['docente_id'] ?? 0;
         </section>
 
         <section id="disponibilidad" class="section hidden">
-            <div class="page-header"><h1>Mi disponibilidad</h1></div>
+            <div class="page-header">
+                <h1>Mi disponibilidad</h1>
+            </div>
             <div class="card">
                 <div class="card-body">
                     <form id="form-disponibilidad">
                         <div class="grid grid-3" style="gap: 12px;">
                             <?php
-                            $dias = ['lunes','martes','miercoles','jueves','viernes'];
+                            $dias = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes'];
                             foreach ($dias as $dia): ?>
                                 <div class="form-group">
                                     <label><?php echo ucfirst($dia); ?></label>
@@ -126,7 +148,9 @@ $docenteId = $docente['docente_id'] ?? 0;
         </section>
 
         <section id="materias" class="section hidden">
-            <div class="page-header"><h1>Mis materias</h1></div>
+            <div class="page-header">
+                <h1>Mis materias</h1>
+            </div>
             <div class="card">
                 <div class="card-body">
                     <table class="table">
@@ -140,7 +164,9 @@ $docenteId = $docente['docente_id'] ?? 0;
                             </tr>
                         </thead>
                         <tbody id="materias-tbody">
-                            <tr><td colspan="5" class="text-center text-muted">Cargando...</td></tr>
+                            <tr>
+                                <td colspan="5" class="text-center text-muted">Cargando...</td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
@@ -230,7 +256,8 @@ $docenteId = $docente['docente_id'] ?? 0;
 
     <script>
         const DOCENTE_ID = <?php echo (int)$docenteId; ?>;
-        const API_BASE = '/ClassControl/src/api';
+        // CORRECCIÓN 1: Usar PHP para generar la ruta base correcta automáticamente
+        const API_BASE = '<?php echo baseUrl("src/api"); ?>';
         let horariosCache = [];
 
         const navLinks = document.querySelectorAll('.nav-link[data-target]');
@@ -242,6 +269,7 @@ $docenteId = $docente['docente_id'] ?? 0;
             }
         }));
 
+        // El event listener pasa el evento 'e' automáticamente
         document.getElementById('btn-logout').addEventListener('click', handleLogout);
 
         document.querySelectorAll('[data-close]').forEach(btn => btn.addEventListener('click', () => closeModal(btn.dataset.close)));
@@ -255,12 +283,12 @@ $docenteId = $docente['docente_id'] ?? 0;
             console.log('[DASHBOARD] Iniciando carga de datos...');
             console.log('[DASHBOARD] DOCENTE_ID:', DOCENTE_ID);
             console.log('[DASHBOARD] API_BASE:', API_BASE);
-            
+
             if (DOCENTE_ID === 0) {
                 showAlert('⚠️ Error: No se encontró tu información de docente. Contacta al administrador.', 'danger', 5000);
                 return;
             }
-            
+
             loadPerfil();
             loadDisponibilidad();
             loadHorario();
@@ -268,26 +296,33 @@ $docenteId = $docente['docente_id'] ?? 0;
 
         async function apiJson(path, options = {}) {
             try {
+                // apiJson se encarga de juntar API_BASE + path
                 const url = path.startsWith('http') ? path : `${API_BASE}${path.startsWith('/') ? '' : '/'}${path}`;
                 console.log('[API] Llamando:', url);
-                
+
                 const response = await fetch(url, {
                     credentials: 'include',
-                    headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...(options.headers || {})
+                    },
                     ...options
                 });
-                
+
                 if (!response.ok) {
                     console.error('[API] Error HTTP:', response.status);
                     throw new Error(`HTTP ${response.status}`);
                 }
-                
+
                 const data = await response.json();
                 console.log('[API] Respuesta:', data);
                 return data;
             } catch (error) {
                 console.error('[API] Error:', error);
-                return { success: false, message: error.message };
+                return {
+                    success: false,
+                    message: error.message
+                };
             }
         }
 
@@ -316,7 +351,7 @@ $docenteId = $docente['docente_id'] ?? 0;
             const modal = document.getElementById(id);
             if (modal) {
                 modal.classList.remove('hidden');
-                
+
                 // Si es el modal de crear horario, cargar asignaciones
                 if (id === 'modal-crear-horario') {
                     cargarAsignacionesParaHorario();
@@ -329,31 +364,53 @@ $docenteId = $docente['docente_id'] ?? 0;
             if (modal) modal.classList.add('hidden');
         }
 
-        async function handleLogout() {
+        // CORRECCIÓN 2: Función Logout mejorada
+        async function handleLogout(e) {
+            // Obtenemos el botón de forma segura
+            const btn = e ? e.currentTarget : document.getElementById('btn-logout');
+
             if (!confirm('¿Deseas cerrar sesión?')) return;
-            const res = await apiJson(`${API_BASE}/auth/logout.php`, { method: 'POST' });
-            if (res.success) {
-                localStorage.clear();
-                sessionStorage.clear();
-                const redirectUrl = res.data?.redirect || '<?php echo baseUrl("public/index.html"); ?>';
-                window.location.href = redirectUrl;
-            } else {
-                showAlert(res.message || 'No se pudo cerrar sesión', 'danger');
+
+            // Desactivar para evitar doble click
+            if (btn) btn.disabled = true;
+
+            try {
+                // CORRECCIÓN 3: Quitamos API_BASE de aquí porque apiJson ya lo pone
+                const res = await apiJson(`/auth/logout.php`, {
+                    method: 'POST'
+                });
+
+                if (res.success) {
+                    localStorage.clear();
+                    sessionStorage.clear();
+                    const redirectUrl = res.data?.redirect || '<?php echo baseUrl("public/index.html"); ?>';
+                    window.location.href = redirectUrl;
+                } else {
+                    showAlert(res.message || 'No se pudo cerrar sesión', 'danger');
+                    if (btn) btn.disabled = false;
+                }
+            } catch (error) {
+                console.error(error);
+                if (btn) btn.disabled = false;
             }
         }
 
         async function loadPerfil() {
             console.log('[PERFIL] Cargando perfil...');
+            // Ruta relativa simple, apiJson agrega el resto
             const res = await apiJson(`/docentes.php?action=profile`);
             console.log('[PERFIL] Respuesta:', res);
-            
+
             if (!res.success || !res.data) {
                 console.error('[PERFIL] Error:', res.message);
                 showAlert(res.message || 'No se pudo cargar el perfil', 'danger');
                 return;
             }
 
-            const { usuario, docente } = res.data;
+            const {
+                usuario,
+                docente
+            } = res.data;
             document.getElementById('info-nombre').textContent = usuario?.nombre || '';
             document.getElementById('info-apellido').textContent = usuario?.apellido || '';
             document.getElementById('info-email').textContent = usuario?.email || '';
@@ -377,7 +434,8 @@ $docenteId = $docente['docente_id'] ?? 0;
                 telefono: form.telefono.value,
                 especialidad: form.especialidad.value
             };
-            const res = await apiJson(`${API_BASE}/docentes.php?action=update_self`, {
+            // CORRECCIÓN: Ruta relativa limpia
+            const res = await apiJson(`/docentes.php?action=update_self`, {
                 method: 'POST',
                 body: JSON.stringify(payload)
             });
@@ -395,7 +453,7 @@ $docenteId = $docente['docente_id'] ?? 0;
             console.log('[DISPONIBILIDAD] Cargando disponibilidad...');
             const res = await apiJson(`/disponibilidad.php?action=list`);
             console.log('[DISPONIBILIDAD] Respuesta:', res);
-            
+
             if (!res.success) {
                 console.error('[DISPONIBILIDAD] Error:', res.message);
                 showAlert(res.message || 'No se pudo cargar disponibilidad', 'danger');
@@ -417,7 +475,7 @@ $docenteId = $docente['docente_id'] ?? 0;
         async function saveDisponibilidad(e) {
             e.preventDefault();
             const form = e.target;
-            const dias = ['lunes','martes','miercoles','jueves','viernes'].map(dia => ({
+            const dias = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes'].map(dia => ({
                 dia_semana: dia,
                 hora_inicio: form[`${dia}_inicio`].value,
                 hora_fin: form[`${dia}_fin`].value,
@@ -430,7 +488,8 @@ $docenteId = $docente['docente_id'] ?? 0;
                 horas_maximas: form.horas_maximas.value
             };
 
-            const res = await apiJson(`${API_BASE}/disponibilidad.php?action=update`, {
+            // CORRECCIÓN: Ruta relativa limpia
+            const res = await apiJson(`/disponibilidad.php?action=update`, {
                 method: 'POST',
                 body: JSON.stringify(payload)
             });
@@ -450,17 +509,16 @@ $docenteId = $docente['docente_id'] ?? 0;
 
         async function loadHorario() {
             console.log('[HORARIO] Cargando horarios...');
-            // Cargar asignaciones confirmadas con horarios
             const res = await apiJson(`/docentes.php?action=asignaciones_confirmadas`);
             console.log('[HORARIO] Respuesta:', res);
-            
+
             if (!res.success) {
                 console.error('[HORARIO] Error:', res.message);
                 showAlert(res.message || 'No se pudo cargar horarios', 'danger');
                 document.getElementById('horario-tbody').innerHTML = '<tr><td colspan="6" class="text-center text-muted">Error al cargar horarios</td></tr>';
                 return;
             }
-            
+
             horariosCache = res.data || [];
             console.log('[HORARIO] Datos cargados:', horariosCache.length, 'registros');
             renderHorario(horariosCache);
@@ -473,7 +531,6 @@ $docenteId = $docente['docente_id'] ?? 0;
                 return;
             }
 
-            // Agrupar por asignación para mostrar cada materia/grupo una sola vez
             const grouped = {};
             horarios.forEach(h => {
                 const key = `${h.asignacion_id}`;
@@ -487,9 +544,8 @@ $docenteId = $docente['docente_id'] ?? 0;
             Object.values(grouped).forEach(items => {
                 const first = items[0];
                 const horariosItems = items.filter(i => i.dia_semana);
-                
+
                 if (horariosItems.length === 0) {
-                    // Sin horario asignado aún
                     rows.push(`
                         <tr style="opacity: 0.7;">
                             <td colspan="6" class="text-center text-muted">
@@ -498,7 +554,6 @@ $docenteId = $docente['docente_id'] ?? 0;
                         </tr>
                     `);
                 } else {
-                    // Con horarios asignados
                     horariosItems.forEach((h, idx) => {
                         rows.push(`
                             <tr>
@@ -515,7 +570,6 @@ $docenteId = $docente['docente_id'] ?? 0;
             });
 
             tbody.innerHTML = rows.join('');
-
             renderMateriasDesdeHorario();
         }
 
@@ -555,7 +609,6 @@ $docenteId = $docente['docente_id'] ?? 0;
             });
 
             tbody.innerHTML = rows.join('');
-
             document.getElementById('stat-materias').textContent = Object.keys(materiasMap).length;
             document.getElementById('stat-grupos').textContent = Object.keys(materiasMap).length;
             document.getElementById('stat-clases').textContent = horariosCache.filter(h => h.dia_semana).length || '0';
@@ -564,17 +617,16 @@ $docenteId = $docente['docente_id'] ?? 0;
         async function cargarAsignacionesParaHorario() {
             const select = document.getElementById('select-asignacion');
             select.innerHTML = '<option value="">Cargando...</option>';
-            
+
             try {
-                // Cargar asignaciones desde el API
-                const res = await apiJson(`${API_BASE}/docentes.php?action=asignaciones_confirmadas`);
-                
+                // CORRECCIÓN: Ruta relativa limpia
+                const res = await apiJson(`/docentes.php?action=asignaciones_confirmadas`);
+
                 if (!res.success) {
                     select.innerHTML = '<option value="">Error al cargar asignaciones</option>';
                     return;
                 }
-                
-                // Agrupar por asignacion_id para evitar duplicados
+
                 const asignacionesMap = {};
                 res.data.forEach(item => {
                     const key = item.asignacion_id;
@@ -590,20 +642,19 @@ $docenteId = $docente['docente_id'] ?? 0;
                         asignacionesMap[key].horarios.push(item);
                     }
                 });
-                
-                // Crear opciones del selector
+
                 const options = ['<option value="">Seleccione una asignación</option>'];
                 Object.values(asignacionesMap).forEach(asig => {
                     const horariosCount = asig.horarios.length;
                     options.push(`<option value="${asig.asignacion_id}">${asig.materia} - ${asig.grupo} (${horariosCount} horarios)</option>`);
                 });
-                
+
                 select.innerHTML = options.join('');
-                
+
                 if (Object.keys(asignacionesMap).length === 0) {
                     select.innerHTML = '<option value="">No tienes asignaciones disponibles</option>';
                 }
-                
+
             } catch (error) {
                 console.error('Error cargando asignaciones:', error);
                 select.innerHTML = '<option value="">Error al cargar asignaciones</option>';
@@ -620,7 +671,8 @@ $docenteId = $docente['docente_id'] ?? 0;
                 hora_fin: form.hora_fin.value
             };
 
-            const res = await apiJson(`${API_BASE}/docentes.php?action=crear_horario`, {
+            // CORRECCIÓN: Ruta relativa limpia
+            const res = await apiJson(`/docentes.php?action=crear_horario`, {
                 method: 'POST',
                 body: JSON.stringify(payload)
             });
