@@ -206,13 +206,11 @@ $user = getCurrentUser();
     </div>
     
     <script>
-        const API_BASE_URL = '/ClassControl';
         let grupoSeleccionado = null;
         
         async function cargarEstadisticas() {
             try {
-                const response = await fetch(`${API_BASE_URL}/src/api/seleccion-docente.php?action=estadisticas`);
-                const result = await response.json();
+                const result = await api('/src/api/seleccion-docente.php?action=estadisticas');
                 
                 if (result.success) {
                     const stats = result.data;
@@ -244,8 +242,7 @@ $user = getCurrentUser();
         
         async function cargarGrupos() {
             try {
-                const response = await fetch(`${API_BASE_URL}/src/api/seleccion-docente.php?action=grupos`);
-                const result = await response.json();
+                const result = await api('/src/api/seleccion-docente.php?action=grupos');
                 
                 if (result.success) {
                     const grupos = result.data;
@@ -276,8 +273,7 @@ $user = getCurrentUser();
             
             // Cargar materias
             try {
-                const response = await fetch(`${API_BASE_URL}/src/api/seleccion-docente.php?action=materias&grupo_id=${grupoId}`);
-                const result = await response.json();
+                const result = await api(`/src/api/seleccion-docente.php?action=materias&grupo_id=${grupoId}`);
                 
                 if (result.success) {
                     const materias = result.data;
@@ -326,17 +322,14 @@ $user = getCurrentUser();
             if (!confirm('¿Confirmas que deseas solicitar esta materia?')) return;
             
             try {
-                const response = await fetch(`${API_BASE_URL}/src/api/seleccion-docente.php`, {
+                const result = await api('/src/api/seleccion-docente.php', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         action: 'solicitar',
                         materia_id: materiaId,
                         grupo_id: grupoId
                     })
                 });
-                
-                const result = await response.json();
                 alert(result.message);
                 
                 if (result.success) {
@@ -352,8 +345,7 @@ $user = getCurrentUser();
         
         async function cargarSolicitudes() {
             try {
-                const response = await fetch(`${API_BASE_URL}/src/api/seleccion-docente.php?action=mis-solicitudes`);
-                const result = await response.json();
+                const result = await api('/src/api/seleccion-docente.php?action=mis-solicitudes');
                 
                 if (result.success) {
                     const solicitudes = result.data;
@@ -388,16 +380,13 @@ $user = getCurrentUser();
             if (!confirm('¿Confirmas que deseas cancelar esta solicitud?')) return;
             
             try {
-                const response = await fetch(`${API_BASE_URL}/src/api/seleccion-docente.php`, {
+                const result = await api('/src/api/seleccion-docente.php', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         action: 'cancelar',
                         asignacion_id: asignacionId
                     })
                 });
-                
-                const result = await response.json();
                 alert(result.message);
                 
                 if (result.success) {
@@ -415,11 +404,10 @@ $user = getCurrentUser();
         async function logout() {
             if (confirm('¿Desea cerrar sesión?')) {
                 try {
-                    const res = await fetch(`${API_BASE_URL}/src/api/auth/logout.php`, { method: 'POST' });
-                    const data = await res.json();
-                    window.location.href = data.redirect || '/ClassControl/public/index.html';
+                    await api('/src/api/auth/logout.php', { method: 'POST' });
+                    window.location.href = '/GENERADOR-DE-HORARIOS/public/index.html';
                 } catch(e) {
-                    window.location.href = '/ClassControl/public/index.html';
+                    window.location.href = '/GENERADOR-DE-HORARIOS/public/index.html';
                 }
             }
         }

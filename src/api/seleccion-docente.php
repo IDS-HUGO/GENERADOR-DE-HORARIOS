@@ -73,6 +73,7 @@ try {
                                     LEFT JOIN asignaciones a ON d.docente_id = a.docente_id
                                     WHERE d.docente_id = ?
                                     GROUP BY d.docente_id";
+                    $db = getDatabase();
                     $stmt = $db->prepare($stats_query);
                     $stmt->bind_param("i", $docente_id);
                     $stmt->execute();
@@ -116,6 +117,7 @@ try {
                     $update_query = "UPDATE asignaciones 
                                     SET estado = 'cancelada' 
                                     WHERE asignacion_id = ? AND docente_id = ? AND estado = 'solicitada'";
+                    $db = getDatabase();
                     $stmt = $db->prepare($update_query);
                     $stmt->bind_param("ii", $asignacion_id, $docente_id);
                     $success = $stmt->execute();
