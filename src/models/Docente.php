@@ -91,11 +91,14 @@ class Docente extends Model {
                     m.semestre,
                     g.nombre as grupo_nombre,
                     CASE WHEN a.asignacion_id IS NOT NULL THEN 1 ELSE 0 END as ya_asignada,
-                    CASE WHEN a.docente_id = ? THEN 1 ELSE 0 END as asignada_a_mi
+                    CASE WHEN a.docente_id = ? THEN 1 ELSE 0 END as asignada_a_mi,
+                    GROUP_CONCAT(CONCAT(h.dia_semana, ' ', h.hora_inicio, '-', h.hora_fin) ORDER BY FIELD(h.dia_semana, 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado', 'domingo') SEPARATOR ' | ') as horarios
                   FROM materias m
                   INNER JOIN grupos g ON m.programa_id = g.programa_id AND m.semestre = g.semestre
                   LEFT JOIN asignaciones a ON m.materia_id = a.materia_id AND g.grupo_id = a.grupo_id
+                  LEFT JOIN horarios h ON m.materia_id = h.materia_id AND g.grupo_id = h.grupo_id
                   WHERE g.grupo_id = ? AND m.estado = 'activa'
+                  GROUP BY m.materia_id, g.grupo_id
                   ORDER BY m.codigo";
         $stmt = $this->db->prepare($query);
         $stmt->bind_param("ii", $docente_id, $grupo_id);
