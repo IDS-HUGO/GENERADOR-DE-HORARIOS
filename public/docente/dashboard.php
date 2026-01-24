@@ -442,6 +442,10 @@ $docenteId = $docente['docente_id'] ?? 0;
 
             if (res.success) {
                 showAlert('Perfil actualizado', 'success');
+                // CORRECCIÓN: Invalidar caché de docentes para que admin vea cambios
+                if (typeof cache !== 'undefined') {
+                    cache.invalidarPorPatron('docentes.php');
+                }
                 closeModal('modal-perfil');
                 loadPerfil();
             } else {
@@ -496,6 +500,10 @@ $docenteId = $docente['docente_id'] ?? 0;
 
             if (res.success) {
                 showAlert('Disponibilidad actualizada', 'success');
+                // CORRECCIÓN: Invalidar caché de docentes para que admin vea cambios
+                if (typeof cache !== 'undefined') {
+                    cache.invalidarPorPatron('docentes.php');
+                }
                 loadDisponibilidad();
             } else {
                 showAlert(res.message || 'No se pudo actualizar', 'danger');

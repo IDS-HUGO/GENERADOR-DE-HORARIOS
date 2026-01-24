@@ -126,6 +126,31 @@ class CacheManager {
             }
         }
     }
+    
+    // Invalidar caché por patrón
+    invalidarPorPatron(patron) {
+        if (this.db) {
+            const transaction = this.db.transaction([this.storeName], 'readwrite');
+            const store = transaction.objectStore(this.storeName);
+            const request = store.getAll();
+            
+            request.onsuccess = () => {
+                request.result.forEach(item => {
+                    if (item.key.includes(patron)) {
+                        store.delete(item.key);
+                        console.log('[CACHE] Invalidado:', item.key);
+                    }
+                });
+            };
+        } else {
+            for (let key in localStorage) {
+                if (key.startsWith('cache_') && key.includes(patron)) {
+                    localStorage.removeItem(key);
+                    console.log('[CACHE] Invalidado:', key);
+                }
+            }
+        }
+    }
 }
 
 // API wrapper con caché automático

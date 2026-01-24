@@ -167,6 +167,11 @@
                 showAlert(`✅ Docente creado\n📧 ${c.email}\n🔐 ${pass}\n${emailStatus}`, 'success', 4000);
                 console.log('📊 Docente creado con credenciales:', c);
 
+                // CORRECCIÓN: Invalidar caché de docentes
+                if (typeof cache !== 'undefined') {
+                    cache.invalidarPorPatron('docentes.php');
+                }
+
                 form.reset();
                 loadDocentes();
                 closeDocenteModal();
@@ -191,6 +196,10 @@
             });
             if (resp.success) {
                 showAlert('✅ Docente eliminado', 'success', 2000);
+                // CORRECCIÓN: Invalidar caché de docentes
+                if (typeof cache !== 'undefined') {
+                    cache.invalidarPorPatron('docentes.php');
+                }
                 loadDocentes();
             } else {
                 showAlert('❌ ' + (resp.message || 'Error'), 'danger', 3000);

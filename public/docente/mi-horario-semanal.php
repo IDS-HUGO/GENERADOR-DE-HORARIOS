@@ -19,7 +19,7 @@ if ($docenteId === 0) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mi Horario Semanal - Universidad Maya</title>
+    <title>Mi Horario Oficial - Universidad Maya</title>
     <link rel="stylesheet" href="../assets/css/style.css">
     <script src="../assets/js/utils.js?v=2.1"></script>
     <style>
@@ -111,23 +111,9 @@ if ($docenteId === 0) {
             font-weight: 500;
         }
         
-        .class-block::before {
-            content: '🗑️';
-            position: absolute;
-            top: 4px;
-            right: 6px;
-            opacity: 0;
-            transition: opacity 0.3s;
-            font-size: 0.9rem;
-        }
-        
         .class-block:hover {
             transform: translateY(-3px);
             box-shadow: 0 6px 16px rgba(0,0,0,0.3);
-        }
-        
-        .class-block:hover::before {
-            opacity: 1;
         }
         
         /* Colores para cada clase por índice de asignación */
@@ -287,46 +273,19 @@ if ($docenteId === 0) {
 
     <div class="calendar-container">
         <div class="calendar-header">
-            <h1>📅 Mi Horario Semanal</h1>
+            <h1>📅 Mi Horario Oficial</h1>
             <div>
                 <button class="btn btn-secondary" onclick="location.reload()">🔄 Recargar</button>
             </div>
         </div>
 
-        <!-- Panel de Agregar Rápido -->
-        <div class="quick-add-panel">
-            <h3 style="margin-bottom: 10px;">➕ Agregar Horario Rápido</h3>
-            <p style="color: #666; font-size: 0.9rem; margin-bottom: 15px;">
-                💡 <strong>Tip:</strong> Haz click en cualquier celda vacía del calendario para auto-completar el día y hora
+        <!-- Información del Horario -->
+        <div class="quick-add-panel" style="background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%); border-left-color: #2e7d32;">
+            <h3 style="margin-bottom: 10px; color: #1b5e20;">ℹ️ Tu Horario Oficial</h3>
+            <p style="color: #2e7d32; font-size: 0.9rem; margin: 0;">
+                🔒 Este es tu horario oficial asignado por administración. 
+                <span id="horario-status" style="font-weight: 600;">Cargando...</span>
             </p>
-            <form class="quick-form" onsubmit="agregarHorarioRapido(event)">
-                <div class="form-group-inline">
-                    <label>Asignación (Materia - Grupo)</label>
-                    <select id="quick-asignacion" required>
-                        <option value="">Cargando...</option>
-                    </select>
-                </div>
-                <div class="form-group-inline">
-                    <label>Día</label>
-                    <select id="quick-dia" required>
-                        <option value="lunes">Lunes</option>
-                        <option value="martes">Martes</option>
-                        <option value="miercoles">Miércoles</option>
-                        <option value="jueves">Jueves</option>
-                        <option value="viernes">Viernes</option>
-                        <option value="sabado">Sábado</option>
-                    </select>
-                </div>
-                <div class="form-group-inline">
-                    <label>Hora Inicio</label>
-                    <input type="time" id="quick-hora-inicio" value="08:00" required step="3600">
-                </div>
-                <div class="form-group-inline">
-                    <label>Hora Fin</label>
-                    <input type="time" id="quick-hora-fin" value="10:00" required step="3600">
-                </div>
-                <button type="submit" class="btn-add-quick">+ Agregar</button>
-            </form>
         </div>
 
         <!-- Calendario Semanal -->
@@ -337,113 +296,76 @@ if ($docenteId === 0) {
         </div>
 
         <!-- Leyenda -->
-        <div class="legend">
-            <div class="legend-item">
-                <div class="legend-color" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);"></div>
-                <span>Clase 1</span>
-            </div>
-            <div class="legend-item">
-                <div class="legend-color" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);"></div>
-                <span>Clase 2</span>
-            </div>
-            <div class="legend-item">
-                <div class="legend-color" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);"></div>
-                <span>Clase 3</span>
-            </div>
-            <div class="legend-item">
-                <div class="legend-color" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);"></div>
-                <span>Clase 4+</span>
-            </div>
-            <div class="legend-item" style="margin-left: auto;">
-                <span>🗑️ = Eliminar | Click = Detalles</span>
-            </div>
+        <div class="legend" style="margin-top: 20px; background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+            <strong>📌 Información del Calendario:</strong>
+            <p style="font-size: 0.85rem; color: #666; margin: 8px 0;">
+                Cada bloque representa una clase de tu horario. 
+                Haz <strong>click</strong> en una clase para ver más detalles (materia, grupo, aula, horario completo).
+            </p>
+            <p style="font-size: 0.85rem; color: #666; margin: 0;">
+                🗑️ Si necesitas realizar cambios en tu horario, contacta al administrador.
+            </p>
         </div>
     </div>
 
     <script>
         const DOCENTE_ID = <?php echo (int)$docenteId; ?>;
-        const API_BASE = '/ClassControl/src/api';
         
         const dias = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado'];
         const horasInicio = ['08:00', '10:00', '12:00', '14:00', '16:00', '18:00', '20:00'];
         let asignacionesData = [];
         let horariosData = [];
 
-        async function apiJson(path, options = {}) {
-            try {
-                const url = path.startsWith('http') ? path : `${API_BASE}${path.startsWith('/') ? '' : '/'}${path}`;
-                const response = await fetch(url, {
-                    credentials: 'include',
-                    headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
-                    ...options
-                });
-                
-                if (!response.ok) {
-                    console.error('Error en respuesta:', response.status, await response.text());
-                    return { success: false, message: 'Error en la petición' };
-                }
-                
-                return await response.json();
-            } catch (error) {
-                console.error('Error en apiJson:', error);
-                return { success: false, message: error.message };
-            }
-        }
-
         async function logout() {
             if (confirm('¿Desea cerrar sesión?')) {
                 try {
-                    const res = await fetch(`${API_BASE}/auth/logout.php`, { method: 'POST' });
+                    const res = await fetch(`${API_BASE_URL}/auth/logout.php`, { method: 'POST' });
                     const data = await res.json();
-                    window.location.href = data.redirect || '/ClassControl/public/index.html';
+                    window.location.href = data.redirect || '/GENERADOR-DE-HORARIOS/public/index.html';
                 } catch(e) {
-                    window.location.href = '/ClassControl/public/index.html';
+                    window.location.href = '/GENERADOR-DE-HORARIOS/public/index.html';
                 }
             }
         }
 
         async function cargarAsignaciones() {
             try {
-                console.log('Cargando asignaciones...');
-                const res = await apiJson(`/docentes.php?action=asignaciones_confirmadas`);
-                console.log('Respuesta:', res);
+                console.log('[HORARIO] Cargando horario oficial...');
+                const res = await api('/src/api/docentes.php?action=asignaciones_confirmadas');
+                console.log('[HORARIO] Respuesta:', res);
                 
                 if (res && res.success && res.data) {
                     asignacionesData = res.data;
                     horariosData = res.data;
-                    actualizarSelectAsignaciones();
+                    
+                    // Actualizar estado
+                    const statusEl = document.getElementById('horario-status');
+                    const clasesCount = horariosData.length;
+                    if (clasesCount === 0) {
+                        statusEl.textContent = '❌ No hay clases asignadas';
+                    } else {
+                        const horas = horariosData.reduce((sum, h) => {
+                            const [hi, mi] = h.hora_inicio.split(':');
+                            const [hf, mf] = h.hora_fin.split(':');
+                            return sum + ((hf - hi) + (mf - mi) / 60);
+                        }, 0).toFixed(1);
+                        statusEl.textContent = `✅ ${clasesCount} clase${clasesCount !== 1 ? 's' : ''} - ${horas} horas/semana`;
+                    }
+                    
                     renderizarCalendario();
                 } else {
-                    console.error('Error al cargar asignaciones:', res);
-                    alert('Error al cargar datos. Por favor recarga la página.');
+                    console.error('Error al cargar horario:', res);
+                    document.getElementById('horario-status').textContent = '⚠️ Error al cargar';
                 }
             } catch (error) {
                 console.error('Error en cargarAsignaciones:', error);
-                alert('Error al cargar datos: ' + error.message);
+                document.getElementById('horario-status').textContent = '⚠️ Error: ' + error.message;
             }
         }
 
         function actualizarSelectAsignaciones() {
-            const select = document.getElementById('quick-asignacion');
-            const asignacionesUnicas = {};
-            
-            asignacionesData.forEach(item => {
-                const key = item.asignacion_id;
-                if (!asignacionesUnicas[key]) {
-                    asignacionesUnicas[key] = {
-                        id: item.asignacion_id,
-                        materia: item.materia_nombre,
-                        grupo: item.grupo_codigo
-                    };
-                }
-            });
-            
-            const options = ['<option value="">Seleccione materia-grupo</option>'];
-            Object.values(asignacionesUnicas).forEach(asig => {
-                options.push(`<option value="${asig.id}">${asig.materia} - ${asig.grupo}</option>`);
-            });
-            
-            select.innerHTML = options.join('');
+            // Esta función ya no es necesaria
+            // El horario es solo lectura
         }
 
         function renderizarCalendario() {
@@ -488,7 +410,7 @@ if ($docenteId === 0) {
                         clases.forEach(clase => {
                             const colorClass = `class-color-${coloresPorMateria[clase.materia_nombre] || 0}`;
                             cellContent += `
-                                <div class="class-block ${colorClass}" onclick="editarHorario(${clase.horario_id})">
+                                <div class="class-block ${colorClass}" onclick="verDetallesHorario(${clase.horario_id})">
                                     <div class="class-block-title">${clase.materia_nombre || 'Sin nombre'}</div>
                                     <div class="class-block-group">Grupo ${clase.grupo_codigo || '-'}</div>
                                     <div class="class-block-group">${clase.hora_inicio.substring(0,5)}-${clase.hora_fin.substring(0,5)}</div>
@@ -506,111 +428,47 @@ if ($docenteId === 0) {
         }
 
         function clickCelda(dia, horaInicio, horaFin) {
-            document.getElementById('quick-dia').value = dia;
-            document.getElementById('quick-hora-inicio').value = horaInicio;
-            document.getElementById('quick-hora-fin').value = horaFin;
-            document.getElementById('quick-asignacion').focus();
+            // Esta función ya no se usa
+            // El horario es solo lectura
         }
 
         async function agregarHorarioRapido(e) {
-            e.preventDefault();
-            
-            // Normalizar horas a formato HH:MM
-            const horaInicio = document.getElementById('quick-hora-inicio').value;
-            const horaFin = document.getElementById('quick-hora-fin').value;
-            
-            const payload = {
-                asignacion_id: parseInt(document.getElementById('quick-asignacion').value),
-                dia_semana: document.getElementById('quick-dia').value,
-                hora_inicio: horaInicio.length === 5 ? horaInicio : horaInicio.padStart(5, '0'),
-                hora_fin: horaFin.length === 5 ? horaFin : horaFin.padStart(5, '0')
-            };
-
-            console.log('[VALIDACION] Intentando agregar:', payload);
-
-            // Validar conflictos: solo hay conflicto si los horarios SE SOLAPAN
-            // Permitimos clases consecutivas (ej: 10:00-12:00 y 12:00-14:00)
-            const conflicto = horariosData.find(h => {
-                if (h.dia_semana !== payload.dia_semana || !h.hora_inicio || !h.hora_fin) {
-                    return false;
-                }
-                
-                // Normalizar horas existentes a formato HH:MM
-                const existenteInicio = h.hora_inicio.substring(0, 5);
-                const existenteFin = h.hora_fin.substring(0, 5);
-                
-                console.log('[VALIDACION] Comparando con:', {
-                    materia: h.materia_nombre,
-                    existente: `${existenteInicio}-${existenteFin}`,
-                    nuevo: `${payload.hora_inicio}-${payload.hora_fin}`
-                });
-                
-                // Hay solapamiento si:
-                // - El nuevo empieza ANTES de que termine el existente Y
-                // - El nuevo termina DESPUÉS de que empiece el existente
-                return payload.hora_inicio < existenteFin && payload.hora_fin > existenteInicio;
-            });
-
-            if (conflicto) {
-                const mensaje = `⚠️ CONFLICTO DETECTADO\n\n` +
-                    `Los horarios se traslapan con:\n` +
-                    `${conflicto.materia_nombre} (${conflicto.grupo_codigo})\n` +
-                    `${conflicto.dia_semana} ${conflicto.hora_inicio.substring(0,5)}-${conflicto.hora_fin.substring(0,5)}\n\n` +
-                    `Nota: Puedes tener clases consecutivas (ej: 12:00-14:00 y 14:00-16:00)`;
-                alert(mensaje);
-                return;
-            }
-
-            const res = await apiJson(`/docentes.php?action=crear_horario`, {
-                method: 'POST',
-                body: JSON.stringify(payload)
-            });
-
-            if (res.success) {
-                alert('✅ Horario agregado exitosamente');
-                await cargarAsignaciones();
-                e.target.reset();
-                document.getElementById('quick-hora-inicio').value = '08:00';
-                document.getElementById('quick-hora-fin').value = '10:00';
-            } else {
-                alert('❌ ' + (res.message || 'Error al agregar horario'));
-            }
+            // Esta función ya no se usa
+            // El horario es solo lectura
         }
 
-        function editarHorario(horarioId) {
+        function verDetallesHorario(horarioId) {
             const horario = horariosData.find(h => h.horario_id === horarioId);
             if (!horario) return;
             
-            const mensaje = `📋 HORARIO ACTUAL\n\n` +
-                `Materia: ${horario.materia_nombre}\n` +
-                `Grupo: ${horario.grupo_codigo}\n` +
-                `Día: ${horario.dia_semana}\n` +
-                `Horario: ${horario.hora_inicio} - ${horario.hora_fin}\n` +
-                `Aula: ${horario.aula_nombre || 'Sin asignar'}\n\n` +
-                `¿Deseas eliminar este horario?`;
+            const mensaje = `📋 DETALLES DE CLASE\n\n` +
+                `Materia: ${horario.materia_nombre || 'Sin nombre'}\n` +
+                `Grupo: ${horario.grupo_codigo || '-'}\n` +
+                `Programa: ${horario.programa_nombre || '-'}\n` +
+                `Semestre: ${horario.semestre || '-'}\n` +
+                `Jornada: ${horario.jornada || '-'}\n` +
+                `Día: ${horario.dia_semana.charAt(0).toUpperCase() + horario.dia_semana.slice(1)}\n` +
+                `Horario: ${horario.hora_inicio.substring(0,5)} - ${horario.hora_fin.substring(0,5)}\n` +
+                `Aula: ${horario.aula_codigo || 'Sin asignar'}\n` +
+                `Créditos: ${horario.creditos || '-'}\n` +
+                `Horas/Semana: ${horario.horas_semana || '-'}`;
             
-            if (confirm(mensaje)) {
-                eliminarHorario(horarioId);
-            }
+            alert(mensaje);
+        }
+
+        async function editarHorario(horarioId) {
+            // Esta función ya no se usa
+            // El horario es solo lectura
         }
 
         async function eliminarHorario(horarioId) {
-            const res = await apiJson(`/horarios.php?action=delete&horario_id=${horarioId}`, {
-                method: 'DELETE'
-            });
-
-            if (res.success) {
-                alert('✅ Horario eliminado exitosamente');
-                await cargarAsignaciones();
-            } else {
-                alert('❌ ' + (res.message || 'Error al eliminar horario'));
-            }
+            // Esta función ya no se usa
+            // El horario es solo lectura
         }
 
         // Inicializar
         document.addEventListener('DOMContentLoaded', () => {
-            console.log('DOCENTE_ID:', DOCENTE_ID);
-            console.log('API_BASE:', API_BASE);
+            console.log('[HORARIO] DOCENTE_ID:', DOCENTE_ID);
             
             if (DOCENTE_ID === 0) {
                 alert('⚠️ Error: No se encontró tu información de docente. Contacta al administrador.');
