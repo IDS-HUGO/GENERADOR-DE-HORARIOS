@@ -37,7 +37,7 @@ elseif ($action === 'update') {
 
     // Construir payload de días
     $diasPayload = [];
-    $diasSemana = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado', 'domingo'];
+    $diasSemana = ['sabado', 'domingo', 'lunes', 'martes', 'miercoles', 'jueves'];
 
     // Caso: payload compacto {dia_semana, hora_inicio, hora_fin}
     if (!empty($data['dia_semana']) || !empty($data['dia'])) {
@@ -50,8 +50,8 @@ elseif ($action === 'update') {
         ];
     }
 
-    // Caso: formulario por día (lunes_inicio, lunes_fin, ...)
-    if (isset($data['lunes_inicio'])) {
+    // Caso: formulario por día (sabado_inicio, sabado_fin, ...)
+    if (isset($data['sabado_inicio'])) {
         $diasPayload = [];
         foreach ($diasSemana as $dia) {
             $inicio = $data[$dia . '_inicio'] ?? null;

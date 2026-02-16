@@ -24,7 +24,7 @@ if ($action === 'generar') {
     }
     
     $sugerencias = [];
-    $dias = ['lunes', 'martes', 'miércoles', 'jueves', 'viernes'];
+    $dias = ['sabado', 'domingo', 'lunes', 'martes', 'miercoles', 'jueves'];
     $horas = ['08:00', '10:00', '12:00', '14:00', '16:00'];
     
     // Obtener horarios ya asignados

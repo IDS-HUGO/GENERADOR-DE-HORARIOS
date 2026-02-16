@@ -123,7 +123,7 @@ $docenteId = $docente['docente_id'] ?? 0;
                     <form id="form-disponibilidad">
                         <div class="grid grid-3" style="gap: 12px;">
                             <?php
-                            $dias = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes'];
+                            $dias = ['sabado', 'domingo', 'lunes', 'martes', 'miercoles', 'jueves'];
                             foreach ($dias as $dia): ?>
                                 <div class="form-group">
                                     <label><?php echo ucfirst($dia); ?></label>
@@ -227,12 +227,12 @@ $docenteId = $docente['docente_id'] ?? 0;
                         <label>Día de la semana</label>
                         <select name="dia_semana" required>
                             <option value="">Seleccione un día</option>
+                            <option value="sabado">Sábado</option>
+                            <option value="domingo">Domingo</option>
                             <option value="lunes">Lunes</option>
                             <option value="martes">Martes</option>
                             <option value="miercoles">Miércoles</option>
                             <option value="jueves">Jueves</option>
-                            <option value="viernes">Viernes</option>
-                            <option value="sabado">Sábado</option>
                         </select>
                     </div>
                     <div class="form-row">
@@ -479,7 +479,7 @@ $docenteId = $docente['docente_id'] ?? 0;
         async function saveDisponibilidad(e) {
             e.preventDefault();
             const form = e.target;
-            const dias = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes'].map(dia => ({
+            const dias = ['sabado', 'domingo', 'lunes', 'martes', 'miercoles', 'jueves'].map(dia => ({
                 dia_semana: dia,
                 hora_inicio: form[`${dia}_inicio`].value,
                 hora_fin: form[`${dia}_fin`].value,

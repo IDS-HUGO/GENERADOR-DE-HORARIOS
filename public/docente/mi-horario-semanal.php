@@ -311,7 +311,7 @@ if ($docenteId === 0) {
     <script>
         const DOCENTE_ID = <?php echo (int)$docenteId; ?>;
         
-        const dias = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado'];
+        const dias = ['sabado', 'domingo', 'lunes', 'martes', 'miercoles', 'jueves'];
         const horasInicio = ['08:00', '10:00', '12:00', '14:00', '16:00', '18:00', '20:00'];
         let asignacionesData = [];
         let horariosData = [];

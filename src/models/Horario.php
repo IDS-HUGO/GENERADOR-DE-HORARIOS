@@ -120,7 +120,7 @@ class Horario extends Model {
                 LEFT JOIN grupos g ON a.grupo_id = g.grupo_id
                 LEFT JOIN aulas au ON h.aula_id = au.aula_id
                 WHERE " . implode(' AND ', $where) . "
-                ORDER BY FIELD(h.dia_semana, 'lunes','martes','miercoles','jueves','viernes','sabado','domingo'), h.hora_inicio";
+                ORDER BY FIELD(h.dia_semana, 'sabado','domingo','lunes','martes','miercoles','jueves'), h.hora_inicio";
 
         if ($types) {
             $stmt = $this->db->prepare($sql);

@@ -63,7 +63,40 @@ try {
                 case 'asignadas':
                     // Obtener materias asignadas al docente
                     $asignadas = $docente_model->getMateriasAsignadas($docente_id);
-                    echo json_encode(['success' => true, 'data' => $asignadas]);
+                    
+                    // Procesar horarios si existen
+                    foreach ($asignadas as &$materia) {
+                        if (!empty($materia['horarios'])) {
+                            $horarios_str = $materia['horarios'];
+                            // Parsear el concatenado de horarios
+                            $horarios_array = explode(' | ', $horarios_str);
+                            $materia['horarios'] = array_map(function($h) {
+                                // Extraer información del horario
+                                preg_match('/(\w+)\s(\d{2}:\d{2})-(\d{2}:\d{2})\s\(Aula:\s(.*?)\)/', $h, $matches);
+                                return [
+                                    'dia' => $matches[1] ?? '',
+                                    'hora_inicio' => $matches[2] ?? '',
+                                    'hora_fin' => $matches[3] ?? '',
+                                    'aula' => trim($matches[4] ?? '')
+                                ];
+                            }, $horarios_array);
+                        } else {
+                            $materia['horarios'] = [];
+                        }
+                    }
+                    
+                    echo json_encode([
+                        'success' => true, 
+                        'data' => [
+                            'materias' => $asignadas,
+                            'estadisticas' => [
+                                'total_materias' => count($asignadas),
+                                'total_grupos' => count(array_unique(array_column($asignadas, 'grupo_id'))),
+                                'total_creditos' => array_sum(array_column($asignadas, 'creditos')),
+                                'total_horas' => array_sum(array_column($asignadas, 'horas_semana'))
+                            ]
+                        ]
+                    ]);
                     break;
                     
                 case 'estadisticas':

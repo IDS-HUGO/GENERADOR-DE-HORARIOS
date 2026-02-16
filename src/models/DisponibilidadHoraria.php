@@ -14,7 +14,7 @@ class DisponibilidadHoraria extends Model {
         $query = "SELECT * FROM {$this->table} 
                   WHERE docente_id = ? AND disponible = TRUE
                   ORDER BY 
-                    FIELD(dia_semana, 'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado'),
+                    FIELD(dia_semana, 'sabado', 'domingo', 'lunes', 'martes', 'miercoles', 'jueves'),
                     hora_inicio ASC";
         $stmt = $this->db->prepare($query);
         $stmt->bind_param("i", $docente_id);
@@ -64,7 +64,7 @@ class DisponibilidadHoraria extends Model {
      * Crear disponibilidad inicial para docente
      */
     public function createInitialAvailability($docente_id, $hora_inicio = '08:00', $hora_fin = '20:00') {
-        $dias = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes'];
+        $dias = ['sabado', 'domingo', 'lunes', 'martes', 'miercoles', 'jueves'];
         
         foreach ($dias as $dia) {
             $this->create([

@@ -132,17 +132,17 @@ try {
                 $emailEnviado = false;
                 $mensajeEmail = '';
                 
-                if (!empty($_ENV['GMAIL_EMAIL'])) {
-                    $emailEnviado = enviarEmailCredenciales(
-                        $data['email'],
-                        $data['nombre'],
-                        $data['apellido'],
-                        $tempPassword
-                    );
-                    $mensajeEmail = $emailEnviado 
-                        ? "✅ Email enviado a {$data['email']}"
-                        : "⚠️ No se pudo enviar email (XAMPP sin SMTP configurado)";
-                }
+                require_once '../includes/EmailService.php';
+                $emailService = new EmailService();
+                $emailResult = $emailService->enviarCredencialesDocente(
+                    $data['email'],
+                    $data['nombre'],
+                    $data['apellido'],
+                    $tempPassword
+                );
+                
+                $emailEnviado = $emailResult['email_sent'] ?? false;
+                $mensajeEmail = $emailResult['message'] ?? '';
                 
                 // Mensaje final
                 $mensaje = "✅ Docente {$data['nombre']} creado exitosamente | " . $mensajeEmail;

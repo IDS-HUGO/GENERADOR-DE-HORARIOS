@@ -197,7 +197,7 @@ class Docente extends Model {
                     a.estado,
                     a.prioridad_asignacion,
                     a.fecha_asignacion,
-                    GROUP_CONCAT(CONCAT(h.dia_semana, ' ', h.hora_inicio, '-', h.hora_fin, ' (Aula: ', COALESCE(au.nombre, 'Por definir'), ')') ORDER BY FIELD(h.dia_semana, 'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado', 'domingo'), h.hora_inicio SEPARATOR ' | ') as horarios
+                    GROUP_CONCAT(CONCAT(h.dia_semana, ' ', h.hora_inicio, '-', h.hora_fin, ' (Aula: ', COALESCE(au.nombre, 'Por definir'), ')') ORDER BY FIELD(h.dia_semana, 'sabado', 'domingo', 'lunes', 'martes', 'miercoles', 'jueves'), h.hora_inicio SEPARATOR ' | ') as horarios
                   FROM asignaciones a
                   INNER JOIN materias m ON a.materia_id = m.materia_id
                   INNER JOIN grupos g ON a.grupo_id = g.grupo_id
